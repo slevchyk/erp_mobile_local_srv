@@ -74,6 +74,7 @@ builds/**/images/*
 *.jpg
 
 # security / ssl
+*.json
 *.pem
 *.xxjson
 *.crt
