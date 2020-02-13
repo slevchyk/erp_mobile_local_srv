@@ -17,9 +17,6 @@ import (
 	"strings"
 )
 
-const
-FirebaseKeyServer = "AAAA6xNz0ms:APA91bHfi9Y-E6JcHfenN7zGDmUII9qjpcZhoTjHw6_vzKnTe73fQgFzC2Z1ymzWDGHfBcyT13Ng0xHm2M30Z55DcvfO4KZFJhAB6sswFmDchRAR72ICpsZUbrMiYXBiFPwDFHruw6Po"
-
 var cfg models.Config
 var db *sql.DB
 var app *firebase.App
@@ -69,7 +66,7 @@ func testHandler(w http.ResponseWriter, r *http.Request) {
 	ctx := context.Background()
 	client, err := app.Messaging(ctx)
 	if err != nil {
-		log.Println("error getting Messaging client: %v\n", err)
+		log.Printf("error getting Messaging client: %v\n", err)
 	}
 
 	// This registration token comes from the client FCM SDKs.
@@ -165,7 +162,7 @@ func channelsHandler(w http.ResponseWriter, r *http.Request) {
 		ctx := context.Background()
 		client, err := app.Messaging(ctx)
 		if err != nil {
-			log.Println("error getting Messaging client: %v\n", err)
+			log.Printf("error getting Messaging client: %v\n", err)
 		}
 
 		// This registration token comes from the client FCM SDKs.
