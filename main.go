@@ -8,6 +8,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"strconv"
 	"strings"
 
 	firebase "firebase.google.com/go"
@@ -197,10 +198,10 @@ func channelsHandler(w http.ResponseWriter, r *http.Request) {
 					Data: map[string]string{
 						"click_action":      "FLUTTER_NOTIFICATION_CLICK",
 						"notification_type": "channel",
-						"id":                string(c.ID),
+						"id":                strconv.Itoa(c.ID),
 						"user_id":           c.UserID,
 						"type":              c.Type,
-						"update_id":         string(c.UpdateID),
+						"update_id":         strconv.Itoa(c.UpdateID),
 						"title":             c.Title,
 						"news":              c.News,
 					},
