@@ -4,17 +4,18 @@ import (
 	"database/sql"
 	"encoding/base64"
 	"encoding/json"
-	firebase "firebase.google.com/go"
-	"firebase.google.com/go/messaging"
 	"fmt"
-	"github.com/slevchyk/erp_mobile_local_srv/dbase"
-	"github.com/slevchyk/erp_mobile_local_srv/models"
-	"golang.org/x/net/context"
-	"google.golang.org/api/option"
 	"io/ioutil"
 	"log"
 	"net/http"
 	"strings"
+
+	firebase "firebase.google.com/go"
+	"firebase.google.com/go/messaging"
+	"github.com/slevchyk/erp_mobile_local_srv/dbase"
+	"github.com/slevchyk/erp_mobile_local_srv/models"
+	"golang.org/x/net/context"
+	"google.golang.org/api/option"
 )
 
 var cfg models.Config
@@ -29,7 +30,7 @@ func init() {
 			User:     "mobile",
 			Password: "Dq4fS^J&^nqQ(fg4",
 		},
-		DB:   models.DBConfig{
+		DB: models.DBConfig{
 			Name:     "worker_local",
 			User:     "worker",
 			Password: "worker",
@@ -81,17 +82,17 @@ func testHandler(w http.ResponseWriter, r *http.Request) {
 	// See documentation on defining a message payload.
 	message := &messaging.Message{
 		Data: map[string]string{
-			"click_action": "FLUTTER_NOTIFICATION_CLICK",
+			"click_action":      "FLUTTER_NOTIFICATION_CLICK",
 			"notification_type": "channel",
-			"id":  "6",
-			"user_id": "",
-			"type": "message",
-			"update_id": "6",
-			"title": "From Go webserver",
-			"news": "Hello world! Happy Valentines Day",
+			"id":                "6",
+			"user_id":           "",
+			"type":              "message",
+			"update_id":         "6",
+			"title":             "From Go webserver",
+			"news":              "Hello world! Happy Valentines Day",
 		},
 		Notification: &notification,
-		Token: registrationToken,
+		Token:        registrationToken,
 	}
 
 	// Send a message to the device corresponding to the provided
@@ -150,7 +151,6 @@ func channelsHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-
 		err = json.Unmarshal(bs, &cs)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -198,7 +198,7 @@ func channelsHandler(w http.ResponseWriter, r *http.Request) {
 					"id":                string(c.ID),
 					"user_id":           c.UserID,
 					"type":              c.Type,
-					"update_id":         c.UpdateID,
+					"update_id":         string(c.UpdateID),
 					"title":             c.Title,
 					"news":              c.News,
 				},
@@ -243,7 +243,7 @@ func tokenHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		rows, err := dbase.SelectFirebaseTokenByUserIdToken(db, ft.UserID, ft.Token);
+		rows, err := dbase.SelectFirebaseTokenByUserIdToken(db, ft.UserID, ft.Token)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return

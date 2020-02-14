@@ -3,9 +3,10 @@ package dbase
 import (
 	"database/sql"
 	"fmt"
-	"github.com/slevchyk/erp_mobile_local_srv/models"
-	_ "github.com/lib/pq"
 	"log"
+
+	_ "github.com/lib/pq"
+	"github.com/slevchyk/erp_mobile_local_srv/models"
 )
 
 func ConnectDB(cfg models.DBConfig) (*sql.DB, error) {
@@ -22,9 +23,10 @@ func InitDB(db *sql.DB) {
 
 	_, err = db.Exec(`
 		CREATE TABLE IF NOT EXISTS channels (
-			id INTEGER,
+			id TEXT,
 			user_id TEXT,
-			update_id INTEGER,
+			update_id TEXT,
+			type TEXT,
 			title TEXT,			
 			new TEXT,
 			date_time TEXT);
