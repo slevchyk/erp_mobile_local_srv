@@ -27,7 +27,7 @@ func InitDB(db *sql.DB) {
 			update_id INTEGER,
 			title TEXT,			
 			new TEXT,
-			date_time TIMESTAMP);
+			date_time TEXT);
 			`)
 	if err != nil {
 		log.Fatal(err)
