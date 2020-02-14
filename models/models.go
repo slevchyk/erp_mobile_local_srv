@@ -8,28 +8,28 @@ type Config struct {
 }
 
 type AuthConfig struct {
-	User string
+	User     string
 	Password string
 }
 
 type DBConfig struct {
-	Name string
-	User string
+	Name     string
+	User     string
 	Password string
 }
 
 type Channel struct {
-	ExtID int `json:"ext_id"`
-	UserID string `json:"user_id"`
-	UpdateID string `json:"update_id"`
-	Type string `json:"type"`
-	Title string `json:"title"`
-	New string `json:"news"`
+	ID       int       `json:"id"`
+	UserID   string    `json:"user_id"`
+	UpdateID string    `json:"update_id"`
+	Type     string    `json:"type"`
+	Title    string    `json:"title"`
+	News     string    `json:"news"`
 	DateTime time.Time `json:"date_time"`
 }
 
 type FirebaseTokens struct {
-	ID string `json:"id"`
+	ID     string `json:"id"`
 	UserID string `json:"user_id"`
-	Token string `json:"token"`
+	Token  string `json:"token"`
 }

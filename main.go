@@ -53,7 +53,7 @@ func main() {
 	http.HandleFunc("/api/token", basicAuth(tokenHandler))
 	http.HandleFunc("/test", testHandler)
 
-	err := http.ListenAndServe(":7133", nil)
+	err := http.ListenAndServe(":8822", nil)
 	if err != nil {
 		panic(err)
 	}
@@ -73,19 +73,22 @@ func testHandler(w http.ResponseWriter, r *http.Request) {
 	registrationToken := "eSoFVzw-C9s:APA91bF0IGHuiCymYX--l4lJDbwDiQw7XaSoyDHIkBRfz4v-5tzdeSBhXqFS0bmYNRP61J5w3kGRlf_A8-OiyaSVoKsW5_69p6_zC2MA4ypufNYXqMxBxtbROB-STv7LCfqAPoXlwrhN"
 
 	notification := messaging.Notification{
-		Title:    "Title go",
-		Body:     "New form go webserver",
-		ImageURL: "",
+		Title:    "From Go webserver",
+		Body:     "Hello world! Happy Valentines Day",
+		ImageURL: "https://previews.123rf.com/images/worldofvector/worldofvector1902/worldofvector190200013/117068035-happy-valentines-day-sign-symbol-red-heart-icon-cute-graphic-object-flat-design-style-love-greeting-.jpg",
 	}
 
 	// See documentation on defining a message payload.
 	message := &messaging.Message{
 		Data: map[string]string{
 			"click_action": "FLUTTER_NOTIFICATION_CLICK",
-			"page": "channel",
-			"time":  "2:45",
-			"title": notification.Title,
-			"news": notification.Body,
+			"notification_type": "channel",
+			"id":  "6",
+			"user_id": "",
+			"type": "message",
+			"update_id": "6",
+			"title": "From Go webserver",
+			"news": "Hello world! Happy Valentines Day",
 		},
 		Notification: &notification,
 		Token: registrationToken,
@@ -158,6 +161,22 @@ func channelsHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
+		rows, err := dbase.SelectFirebaseTokenByUserId(db, c.UserID)
+		if err != nil {
+			return
+		}
+		defer rows.Close()
+
+		if !rows.Next() {
+			return
+		}
+
+		var ft models.FirebaseTokens
+		err = dbase.ScanFirebaseToken(rows, &ft)
+		if err != nil {
+			return
+		}
+
 		// Obtain a messaging.Client from the App.
 		ctx := context.Background()
 		client, err := app.Messaging(ctx)
@@ -166,18 +185,23 @@ func channelsHandler(w http.ResponseWriter, r *http.Request) {
 		}
 
 		// This registration token comes from the client FCM SDKs.
-		registrationToken := "fBdPzDgC9eM:APA91bFZ97xXxQr6jUZpY4Cn2VXp0BnlhNg9loAHlAEI_MLbdgP8H-txBEBZoLXRJ84CvQfwlnel7udFHXSxQssPzWkwwpq817euuYPR0gVMoPYCxG9qIN7JzCnmoKqKIElWcHQzHsbC"
+		registrationToken := ft.Token
 
 		// See documentation on defining a message payload.
 		message := &messaging.Message{
 			Data: map[string]string{
-				"key": "FLUTTER_NOTIFICATION_CLICK",
-				"score": "850",
-				"time":  "2:45",
+				"click_action": "FLUTTER_NOTIFICATION_CLICK",
+				"notification_type": "channel",
+				"id":  string(c.ID),
+				"user_id": c.UserID,
+				"type": c.Type,
+				"update_id": c.UpdateID,
+				"title": c.Title,
+				"news": c.News,
 			},
 			Notification: &messaging.Notification{
-				Title:    "Title",
-				Body:     "New form go webserver",
+				Title:    c.Title,
+				Body:     c.News,
 				ImageURL: "",
 			},
 			Token: registrationToken,
@@ -187,7 +211,7 @@ func channelsHandler(w http.ResponseWriter, r *http.Request) {
 		// registration token.
 		response, err := client.Send(ctx, message)
 		if err != nil {
-			log.Fatalln(err)
+			log.Println(err)
 		}
 		// Response is a message ID string.
 		fmt.Println("Successfully sent message:", response)

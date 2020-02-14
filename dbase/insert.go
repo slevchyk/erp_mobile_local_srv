@@ -10,7 +10,7 @@ func InsertChannel(db *sql.DB, c models.Channel) (sql.Result, error)  {
 	stmt, _ := db.Prepare(`
 		INSERT INTO
 			users (
-				ext_id,
+				id,
 				user_id,
 				update_id,
 				title,
@@ -19,7 +19,7 @@ func InsertChannel(db *sql.DB, c models.Channel) (sql.Result, error)  {
 				)
 		VALUES ($1, $2, $3, $4, $5, $6);`)
 
-	return stmt.Exec(c.ExtID, c.UserID, c.UpdateID, c.Title, c.New, c.DateTime)
+	return stmt.Exec(c.ID, c.UserID, c.UpdateID, c.Title, c.News, c.DateTime)
 }
 
 func InsertToken(db *sql.DB, ft models.FirebaseTokens) (sql.Result, error)  {
