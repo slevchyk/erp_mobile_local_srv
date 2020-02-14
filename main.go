@@ -164,60 +164,63 @@ func channelsHandler(w http.ResponseWriter, r *http.Request) {
 				continue
 			}
 
-			rows, err := dbase.SelectFirebaseTokenByUserId(db, c.UserID)
-			if err != nil {
-				continue
-			}
-			defer rows.Close()
+			if c.UserID != "" {
 
-			if !rows.Next() {
-				continue
-			}
+				rows, err := dbase.SelectFirebaseTokenByUserId(db, c.UserID)
+				if err != nil {
+					continue
+				}
+				defer rows.Close()
 
-			var ft models.FirebaseTokens
-			err = dbase.ScanFirebaseToken(rows, &ft)
-			if err != nil {
-				continue
-			}
+				if !rows.Next() {
+					continue
+				}
 
-			// Obtain a messaging.Client from the App.
-			ctx := context.Background()
-			client, err := app.Messaging(ctx)
-			if err != nil {
-				log.Printf("error getting Messaging client: %v\n", err)
-			}
+				var ft models.FirebaseTokens
+				err = dbase.ScanFirebaseToken(rows, &ft)
+				if err != nil {
+					continue
+				}
 
-			// This registration token comes from the client FCM SDKs.
-			registrationToken := ft.Token
+				// Obtain a messaging.Client from the App.
+				ctx := context.Background()
+				client, err := app.Messaging(ctx)
+				if err != nil {
+					log.Printf("error getting Messaging client: %v\n", err)
+				}
 
-			// See documentation on defining a message payload.
-			message := &messaging.Message{
-				Data: map[string]string{
-					"click_action":      "FLUTTER_NOTIFICATION_CLICK",
-					"notification_type": "channel",
-					"id":                string(c.ID),
-					"user_id":           c.UserID,
-					"type":              c.Type,
-					"update_id":         string(c.UpdateID),
-					"title":             c.Title,
-					"news":              c.News,
-				},
-				Notification: &messaging.Notification{
-					Title:    c.Title,
-					Body:     c.News,
-					ImageURL: "",
-				},
-				Token: registrationToken,
-			}
+				// This registration token comes from the client FCM SDKs.
+				registrationToken := ft.Token
 
-			// Send a message to the device corresponding to the provided
-			// registration token.
-			response, err := client.Send(ctx, message)
-			if err != nil {
-				log.Println(err)
+				// See documentation on defining a message payload.
+				message := &messaging.Message{
+					Data: map[string]string{
+						"click_action":      "FLUTTER_NOTIFICATION_CLICK",
+						"notification_type": "channel",
+						"id":                string(c.ID),
+						"user_id":           c.UserID,
+						"type":              c.Type,
+						"update_id":         string(c.UpdateID),
+						"title":             c.Title,
+						"news":              c.News,
+					},
+					Notification: &messaging.Notification{
+						Title:    c.Title,
+						Body:     c.News,
+						ImageURL: "",
+					},
+					Token: registrationToken,
+				}
+
+				// Send a message to the device corresponding to the provided
+				// registration token.
+				response, err := client.Send(ctx, message)
+				if err != nil {
+					log.Println(err)
+				}
+				// Response is a message ID string.
+				fmt.Println("Successfully sent message:", response)
 			}
-			// Response is a message ID string.
-			fmt.Println("Successfully sent message:", response)
 		}
 
 		w.WriteHeader(http.StatusOK)
