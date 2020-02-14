@@ -19,7 +19,7 @@ type DBConfig struct {
 type Channel struct {
 	ID       int       `json:"id"`
 	UserID   string    `json:"user_id"`
-	UpdateID string    `json:"update_id"`
+	UpdateID int    `json:"update_id"`
 	Type     string    `json:"type"`
 	Title    string    `json:"title"`
 	News     string    `json:"news"`

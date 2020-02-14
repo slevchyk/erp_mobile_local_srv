@@ -22,9 +22,9 @@ func InitDB(db *sql.DB) {
 
 	_, err = db.Exec(`
 		CREATE TABLE IF NOT EXISTS channels (
-			id INTEGER,
+			id TEXT,
 			user_id TEXT,
-			update_id INTEGER,
+			update_id TEXT,
 			title TEXT,			
 			new TEXT,
 			date_time TEXT);
