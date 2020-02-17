@@ -23,9 +23,9 @@ func InitDB(db *sql.DB) {
 
 	_, err = db.Exec(`
 		CREATE TABLE IF NOT EXISTS channels (
-			id TEXT,
+			id INTEGER,
 			user_id TEXT,
-			update_id TEXT,
+			update_id INTEGER ,
 			type TEXT,
 			title TEXT,			
 			new TEXT,
@@ -44,4 +44,23 @@ func InitDB(db *sql.DB) {
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	_, err = db.Exec(`
+		CREATE TABLE IF NOT EXISTS timing (
+			id SERIAL PRIMARY KEY,
+			ext_id TEXT,
+			user_id TEXT,
+			date TEXT,
+			operation TEXT,
+			started_at TEXT,
+			ended_at TEXT,
+			created_at TEXT,
+			updated_at TEXT,
+			deleted_at TEXT,
+			is_turnstile BOOLEAN);
+			`)
+	if err != nil {
+		log.Fatal(err)
+	}
+
 }

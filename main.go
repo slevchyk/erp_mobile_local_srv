@@ -143,90 +143,158 @@ func validate(username, password string) bool {
 func channelsHandler(w http.ResponseWriter, r *http.Request) {
 
 	if r.Method == "POST" {
-		var cs []models.Channel
-		var err error
+		channelPost(w, r)
+	} else if r.Method == "GET" {
 
-		bs, err := ioutil.ReadAll(r.Body)
+	}
+
+}
+
+func channelPost(w http.ResponseWriter, r *http.Request) {
+
+	var cs []models.Channel
+	var err error
+
+	bs, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	err = json.Unmarshal(bs, &cs)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	for _, c := range cs {
+
+		rows, err := dbase.SelectChannelById(db, c.ID)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
+			continue
 		}
+		defer rows.Close()
 
-		err = json.Unmarshal(bs, &cs)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-
-		for _, c := range cs {
+		if rows.Next() {
+			_, err = dbase.UpdateChannel(db, c)
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				continue
+			}
+		} else {
 			_, err = dbase.InsertChannel(db, c)
 			if err != nil {
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 				continue
 			}
-
-			if c.UserID != "" {
-
-				rows, err := dbase.SelectFirebaseTokenByUserId(db, c.UserID)
-				if err != nil {
-					continue
-				}
-				defer rows.Close()
-
-				if !rows.Next() {
-					continue
-				}
-
-				var ft models.FirebaseTokens
-				err = dbase.ScanFirebaseToken(rows, &ft)
-				if err != nil {
-					continue
-				}
-
-				// Obtain a messaging.Client from the App.
-				ctx := context.Background()
-				client, err := app.Messaging(ctx)
-				if err != nil {
-					log.Printf("error getting Messaging client: %v\n", err)
-				}
-
-				// This registration token comes from the client FCM SDKs.
-				registrationToken := ft.Token
-
-				// See documentation on defining a message payload.
-				message := &messaging.Message{
-					Data: map[string]string{
-						"click_action":      "FLUTTER_NOTIFICATION_CLICK",
-						"notification_type": "channel",
-						"id":                strconv.Itoa(c.ID),
-						"user_id":           c.UserID,
-						"type":              c.Type,
-						"update_id":         strconv.Itoa(c.UpdateID),
-						"title":             c.Title,
-						"news":              c.News,
-					},
-					Notification: &messaging.Notification{
-						Title:    c.Title,
-						Body:     c.News,
-						ImageURL: "",
-					},
-					Token: registrationToken,
-				}
-
-				// Send a message to the device corresponding to the provided
-				// registration token.
-				response, err := client.Send(ctx, message)
-				if err != nil {
-					log.Println(err)
-				}
-				// Response is a message ID string.
-				fmt.Println("Successfully sent message:", response)
-			}
 		}
 
-		w.WriteHeader(http.StatusOK)
+		if c.UserID != "" {
+
+			rows, err := dbase.SelectFirebaseTokenByUserId(db, c.UserID)
+			if err != nil {
+				continue
+			}
+			defer rows.Close()
+
+			if !rows.Next() {
+				continue
+			}
+
+			var ft models.FirebaseTokens
+			err = dbase.ScanFirebaseToken(rows, &ft)
+			if err != nil {
+				continue
+			}
+
+			sendChannelNotification(c, ft.Token)
+		} else {
+			//to all users
+			sendChannelNotification(c, "")
+		}
 	}
 
+	w.WriteHeader(http.StatusOK)
+}
+
+func sendChannelNotification(c models.Channel, token string) {
+	// Obtain a messaging.Client from the App.
+	ctx := context.Background()
+	client, err := app.Messaging(ctx)
+	if err != nil {
+		log.Printf("error getting Messaging client: %v\n", err)
+	}
+
+	// See documentation on defining a message payload.
+	message := &messaging.Message{
+		Data: map[string]string{
+			"click_action":      "FLUTTER_NOTIFICATION_CLICK",
+			"notification_type": "channel",
+			"id":                strconv.Itoa(c.ID),
+			"user_id":           c.UserID,
+			"type":              c.Type,
+			"update_id":         strconv.Itoa(c.UpdateID),
+			"title":             c.Title,
+			"news":              c.News,
+		},
+		Notification: &messaging.Notification{
+			Title:    c.Title,
+			Body:     c.News,
+			ImageURL: "",
+		},
+		Token: token,
+	}
+
+	// Send a message to the device corresponding to the provided
+	// registration token.
+	response, err := client.Send(ctx, message)
+	if err != nil {
+		log.Println(err)
+	}
+	// Response is a message ID string.
+	fmt.Println("Successfully sent message:", response)
+}
+
+func channelGet(w http.ResponseWriter, r *http.Request) {
+
+	var cs []models.Channel
+	var c models.Channel
+	var err error
+
+	fvUpdateID := r.FormValue("offset")
+
+	updateID, err := strconv.Atoi(fvUpdateID)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	rows, err := dbase.SelectChannelsByUserIdUpdateId(db, updateID)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		err = dbase.ScanChannel(rows, &c)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		cs = append(cs, c)
+	}
+
+	result, err := json.Marshal(cs)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.Write(result)
+	w.WriteHeader(http.StatusOK)
 }
 
 func tokenHandler(w http.ResponseWriter, r *http.Request) {
@@ -282,5 +350,4 @@ func tokenHandler(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 
 	}
-
 }
