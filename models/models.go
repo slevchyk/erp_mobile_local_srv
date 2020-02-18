@@ -23,7 +23,7 @@ type Channel struct {
 	Type     string `json:"type"`
 	Title    string `json:"title"`
 	News     string `json:"news"`
-	DateTime string `json:"date"`
+	Date     string `json:"date"`
 }
 
 type FirebaseTokens struct {

@@ -28,8 +28,8 @@ func InitDB(db *sql.DB) {
 			update_id INTEGER ,
 			type TEXT,
 			title TEXT,			
-			new TEXT,
-			date_time TEXT);
+			news TEXT,
+			date TEXT);
 			`)
 	if err != nil {
 		log.Fatal(err)

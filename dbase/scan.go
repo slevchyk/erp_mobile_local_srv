@@ -10,5 +10,5 @@ func ScanFirebaseToken(rows *sql.Rows, ft *models.FirebaseTokens) error {
 }
 
 func ScanChannel(rows *sql.Rows, c *models.Channel) error {
-	return rows.Scan(&c.ID, &c.UserID, &c.UpdateID, &c.Type, &c.Title, &c.News, &c.DateTime)
+	return rows.Scan(&c.ID, &c.UserID, &c.UpdateID, &c.Type, &c.Title, &c.News, &c.Date)
 }

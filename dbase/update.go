@@ -25,7 +25,7 @@ func UpdateChannel(db *sql.DB, c models.Channel) (sql.Result, error) {
 	if err != nil {
 		return nil, err
 	}
-	res, err := stmt.Exec(c.UserID, c.UpdateID, c.Type, c.Title, c.News, c.DateTime)
+	res, err := stmt.Exec(c.UserID, c.UpdateID, c.Type, c.Title, c.News, c.Date)
 
 	return res, err
 }
