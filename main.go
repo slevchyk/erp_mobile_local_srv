@@ -145,7 +145,7 @@ func channelsHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "POST" {
 		channelPost(w, r)
 	} else if r.Method == "GET" {
-
+		channelGet(w, r)
 	}
 
 }
@@ -262,6 +262,7 @@ func channelGet(w http.ResponseWriter, r *http.Request) {
 	var c models.Channel
 	var err error
 
+	fvUserID := r.FormValue("userid")
 	fvUpdateID := r.FormValue("offset")
 
 	updateID, err := strconv.Atoi(fvUpdateID)
@@ -270,7 +271,7 @@ func channelGet(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	rows, err := dbase.SelectChannelsByUserIdUpdateId(db, updateID)
+	rows, err := dbase.SelectChannelsByUserIdUpdateId(db, fvUserID, updateID)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

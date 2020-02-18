@@ -46,7 +46,7 @@ func SelectChannelById(db *sql.DB, id int) (*sql.Rows, error) {
 			c.id=$1`, id)
 }
 
-func SelectChannelsByUserIdUpdateId(db *sql.DB, updateID int) (*sql.Rows, error)  {
+func SelectChannelsByUserIdUpdateId(db *sql.DB, userID string, updateID int) (*sql.Rows, error) {
 
 	return db.Query(`
 		SELECT
@@ -60,6 +60,6 @@ func SelectChannelsByUserIdUpdateId(db *sql.DB, updateID int) (*sql.Rows, error)
 		FROM 
 			channels c
 		WHERE
-		c.user_id = $1
-			c.update_id>=$1`, updateID)
+		c.user_id=$1
+			and c.update_id>=$2`, userID, updateID)
 }
