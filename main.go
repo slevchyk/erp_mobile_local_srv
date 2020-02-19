@@ -449,7 +449,7 @@ func timingPost(w http.ResponseWriter, r *http.Request) {
 			}
 
 		} else if fvFrom == Accounting {
-			rows, err := dbase.SelectTimingByExtIdUerIdDate(db, t.AccID, t.UserID, t.Date)
+			rows, err := dbase.SelectTimingByAccIdUerIdDate(db, t.AccID, t.UserID, t.Date)
 			if err != nil {
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 				return

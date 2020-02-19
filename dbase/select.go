@@ -64,7 +64,7 @@ func SelectChannelsByUserIdUpdateId(db *sql.DB, userID string, updateID int) (*s
 			and c.update_id>=$2`, userID, updateID)
 }
 
-func SelectTimingById(db *sql.DB, id int) (*sql.Rows, error) {
+func SelectTimingById(db *sql.DB, id int64) (*sql.Rows, error) {
 
 	return db.Query(`
 		SELECT
@@ -86,7 +86,7 @@ func SelectTimingById(db *sql.DB, id int) (*sql.Rows, error) {
 		t.id=$1`, id)
 }
 
-func SelectTimingByMobIdUserIdDate(db *sql.DB, id int, userID, date string) (*sql.Rows, error) {
+func SelectTimingByMobIdUserIdDate(db *sql.DB, id int64, userID, date string) (*sql.Rows, error) {
 
 	return db.Query(`
 		SELECT
@@ -110,7 +110,7 @@ func SelectTimingByMobIdUserIdDate(db *sql.DB, id int, userID, date string) (*sq
 		and t.date=$3`, id, userID, date)
 }
 
-func SelectTimingByExtIdUerIdDate(db *sql.DB, id int, userID, date string) (*sql.Rows, error) {
+func SelectTimingByAccIdUerIdDate(db *sql.DB, accID, userID, date string) (*sql.Rows, error) {
 
 	return db.Query(`
 		SELECT
@@ -131,5 +131,5 @@ func SelectTimingByExtIdUerIdDate(db *sql.DB, id int, userID, date string) (*sql
 		WHERE
 		t.ext_id=$1
 		and t.user_id=$2
-		and t.date=$3`, id, userID, date)
+		and t.date=$3`, accID, userID, date)
 }
