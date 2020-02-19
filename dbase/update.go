@@ -2,6 +2,7 @@ package dbase
 
 import (
 	"database/sql"
+
 	"github.com/slevchyk/erp_mobile_local_srv/models"
 )
 
@@ -14,18 +15,18 @@ func UpdateChannel(db *sql.DB, c models.Channel) (sql.Result, error) {
 				channels
 			SET
 				user_id = $1,
-				update_id = %2,
+				update_id = $2,
 				type = $3,
 				title = $4,
 				news = $5,
 				date = $6				
 			WHERE
-				user_id=$2
+				id=$7
 			`)
 	if err != nil {
 		return nil, err
 	}
-	res, err := stmt.Exec(c.UserID, c.UpdateID, c.Type, c.Title, c.News, c.Date)
+	res, err := stmt.Exec(c.UserID, c.UpdateID, c.Type, c.Title, c.News, c.Date, c.ID)
 
 	return res, err
 }

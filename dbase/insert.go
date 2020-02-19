@@ -16,8 +16,8 @@ func InsertChannel(db *sql.DB, c models.Channel) (sql.Result, error) {
 				type,
 				update_id,
 				title,
-				new,				 
-				date_time
+				news,				 
+				date
 				)
 		VALUES ($1, $2, $3, $4, $5, $6, $7);`)
 
