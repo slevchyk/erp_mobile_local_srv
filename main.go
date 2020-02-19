@@ -23,6 +23,11 @@ var cfg models.Config
 var db *sql.DB
 var app *firebase.App
 
+const (
+	Mobile     = "mobile"
+	Accounting = "accounting"
+)
+
 func init() {
 	var err error
 
@@ -53,6 +58,7 @@ func main() {
 	http.Handle("/favicon.ico", http.NotFoundHandler())
 	http.HandleFunc("/api/channel", basicAuth(channelsHandler))
 	http.HandleFunc("/api/token", basicAuth(tokenHandler))
+	http.HandleFunc("/api/timing", basicAuth(timingHandler))
 	http.HandleFunc("/test", testHandler)
 
 	err := http.ListenAndServe(":8822", nil)
@@ -352,3 +358,131 @@ func tokenHandler(w http.ResponseWriter, r *http.Request) {
 
 	}
 }
+
+func timingHandler(w http.ResponseWriter, r *http.Request) {
+
+	if r.Method == "POST" {
+		timingPost(w, r)
+	}
+}
+
+func timingPost(w http.ResponseWriter, r *http.Request) {
+
+	var ts []models.Timing
+	//var t models.Timing
+	var err error
+
+	fvFrom := r.FormValue("from")
+
+	if fvFrom != Mobile && fvFrom != Accounting {
+		http.Error(w, "wrong \"from\" param", http.StatusBadRequest)
+		return
+	}
+
+	bs, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	err = json.Unmarshal(bs, &ts)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	for _, t := range ts {
+		if t.ID != 0 {
+			rows, err := dbase.SelectTimingById(db, t.ID)
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
+
+			if !rows.Next() {
+				http.Error(w, fmt.Sprintf("timing with id=%v not found\n", t.ID), http.StatusBadRequest)
+				return
+			}
+
+			_, err = dbase.UpdateTiming(db, t)
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
+
+		} else if fvFrom == Mobile {
+			rows, err := dbase.SelectTimingByMobIdUserIdDate(db, t.MobID, t.UserID, t.Date)
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
+
+			if rows.Next() {
+				var et models.Timing
+				err = dbase.ScanTiming(rows, &et)
+				if err != nil {
+					http.Error(w, err.Error(), http.StatusInternalServerError)
+					return
+				}
+
+				if t.UpdatedAt > et.UpdatedAt {
+					t.AccID = et.AccID
+					_, err = dbase.UpdateTiming(db, t)
+					if err != nil {
+						http.Error(w, err.Error(), http.StatusInternalServerError)
+						return
+					}
+				}
+			} else {
+				_, err = dbase.InsertTiming(db, t)
+				if err != nil {
+					http.Error(w, err.Error(), http.StatusInternalServerError)
+					return
+				}
+			}
+
+		} else if fvFrom == Accounting {
+			rows, err := dbase.SelectTimingByExtIdUerIdDate(db, t.AccID, t.UserID, t.Date)
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
+
+			if !rows.Next() {
+				var et models.Timing
+				err = dbase.ScanTiming(rows, &et)
+				if err != nil {
+					http.Error(w, err.Error(), http.StatusInternalServerError)
+					return
+				}
+
+				if t.UpdatedAt > et.UpdatedAt {
+					t.MobID = et.MobID
+					_, err = dbase.UpdateTiming(db, t)
+					if err != nil {
+						http.Error(w, err.Error(), http.StatusInternalServerError)
+						return
+					}
+				}
+			} else {
+				_, err = dbase.InsertTiming(db, t)
+				if err != nil {
+					http.Error(w, err.Error(), http.StatusInternalServerError)
+					return
+				}
+			}
+		}
+	}
+
+	bs, err = json.Marshal(ts)
+	if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+	}
+
+	w.Write(bs)
+	w.WriteHeader(http.StatusOK)
+}
+
+
+

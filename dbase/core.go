@@ -48,16 +48,17 @@ func InitDB(db *sql.DB) {
 	_, err = db.Exec(`
 		CREATE TABLE IF NOT EXISTS timing (
 			id SERIAL PRIMARY KEY,
-			ext_id TEXT,
+			mob_id INTEGER,
+			acc_id TEXT,
 			user_id TEXT,
 			date TEXT,
-			operation TEXT,
+			status TEXT,
+			is_turnstile BOOLEAN,
 			started_at TEXT,
 			ended_at TEXT,
 			created_at TEXT,
 			updated_at TEXT,
-			deleted_at TEXT,
-			is_turnstile BOOLEAN);
+			deleted_at TEXT);
 			`)
 	if err != nil {
 		log.Fatal(err)

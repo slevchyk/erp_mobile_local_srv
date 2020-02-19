@@ -31,3 +31,18 @@ type FirebaseTokens struct {
 	UserID string `json:"user_id"`
 	Token  string `json:"token"`
 }
+
+type Timing struct {
+	ID          int    `json:"id"`
+	MobID       int    `json:"mob_id"`
+	AccID       int    `json:"acc_id"`
+	UserID      string `json:"user_id"`
+	Date        string `json:"date"`
+	Status      string `json:"status"`
+	IsTurnstile bool   `json:"is_turnstile"`
+	StartedAt   string `json:"started_at"`
+	EndedAt     string `json:"ended_at"`
+	CreatedAt   string `json:"created_at"`
+	UpdatedAt   string `json:"updated_at"`
+	DeletedAt   string `json:"deleted_at"`
+}
