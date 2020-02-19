@@ -1,5 +1,9 @@
 package models
 
+import (
+	"fmt"
+)
+
 type Config struct {
 	Auth AuthConfig
 	DB   DBConfig
@@ -14,6 +18,20 @@ type DBConfig struct {
 	Name     string
 	User     string
 	Password string
+}
+
+type ConvertibleBoolean bool
+
+func (bit *ConvertibleBoolean) UnmarshalJSON(data []byte) error {
+	asString := string(data)
+	if asString == "1" || asString == "true" {
+		*bit = true
+	} else if asString == "0" || asString == "false" {
+		*bit = false
+	} else {
+		return fmt.Errorf("Boolean unmarshal error: invalid input %s", asString)
+	}
+	return nil
 }
 
 type Channel struct {
@@ -39,7 +57,7 @@ type Timing struct {
 	UserID      string `json:"user_id"`
 	Date        string `json:"date"`
 	Status      string `json:"status"`
-	IsTurnstile bool   `json:"is_turnstile"`
+	IsTurnstile ConvertibleBoolean   `json:"is_turnstile"`
 	StartedAt   string `json:"started_at"`
 	EndedAt     string `json:"ended_at"`
 	CreatedAt   string `json:"created_at"`
