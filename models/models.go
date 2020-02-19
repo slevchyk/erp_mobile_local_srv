@@ -51,16 +51,16 @@ type FirebaseTokens struct {
 }
 
 type Timing struct {
-	ID          int    `json:"id"`
-	MobID       int    `json:"mob_id"`
-	AccID       int    `json:"acc_id"`
-	UserID      string `json:"user_id"`
-	Date        string `json:"date"`
-	Status      string `json:"status"`
-	IsTurnstile ConvertibleBoolean   `json:"is_turnstile"`
-	StartedAt   string `json:"started_at"`
-	EndedAt     string `json:"ended_at"`
-	CreatedAt   string `json:"created_at"`
-	UpdatedAt   string `json:"updated_at"`
-	DeletedAt   string `json:"deleted_at"`
+	ID          int64              `json:"id"`
+	MobID       int64              `json:"mob_id"`
+	AccID       string             `json:"acc_id"`
+	UserID      string             `json:"user_id"`
+	Date        string             `json:"date"`
+	Status      string             `json:"status"`
+	IsTurnstile ConvertibleBoolean `json:"is_turnstile"`
+	StartedAt   string             `json:"started_at"`
+	EndedAt     string             `json:"ended_at"`
+	CreatedAt   string             `json:"created_at"`
+	UpdatedAt   string             `json:"updated_at"`
+	DeletedAt   string             `json:"deleted_at"`
 }

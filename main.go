@@ -425,8 +425,9 @@ func timingPost(w http.ResponseWriter, r *http.Request) {
 					return
 				}
 
+				t.ID = et.ID
+				t.AccID = et.AccID
 				if t.UpdatedAt > et.UpdatedAt {
-					t.AccID = et.AccID
 					_, err = dbase.UpdateTiming(db, t)
 					if err != nil {
 						http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -434,7 +435,13 @@ func timingPost(w http.ResponseWriter, r *http.Request) {
 					}
 				}
 			} else {
-				_, err = dbase.InsertTiming(db, t)
+				res, err := dbase.InsertTiming(db, t)
+				if err != nil {
+					http.Error(w, err.Error(), http.StatusInternalServerError)
+					return
+				}
+
+				t.ID, err = res.LastInsertId()
 				if err != nil {
 					http.Error(w, err.Error(), http.StatusInternalServerError)
 					return
@@ -456,8 +463,9 @@ func timingPost(w http.ResponseWriter, r *http.Request) {
 					return
 				}
 
+				t.ID = et.ID
+				t.MobID = et.MobID
 				if t.UpdatedAt > et.UpdatedAt {
-					t.MobID = et.MobID
 					_, err = dbase.UpdateTiming(db, t)
 					if err != nil {
 						http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -465,7 +473,13 @@ func timingPost(w http.ResponseWriter, r *http.Request) {
 					}
 				}
 			} else {
-				_, err = dbase.InsertTiming(db, t)
+				res, err := dbase.InsertTiming(db, t)
+				if err != nil {
+					http.Error(w, err.Error(), http.StatusInternalServerError)
+					return
+				}
+
+				t.ID, err = res.LastInsertId()
 				if err != nil {
 					http.Error(w, err.Error(), http.StatusInternalServerError)
 					return
@@ -476,13 +490,10 @@ func timingPost(w http.ResponseWriter, r *http.Request) {
 
 	bs, err = json.Marshal(ts)
 	if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
 	}
 
 	w.Write(bs)
 	w.WriteHeader(http.StatusOK)
 }
-
-
-
