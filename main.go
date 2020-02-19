@@ -435,13 +435,7 @@ func timingPost(w http.ResponseWriter, r *http.Request) {
 					}
 				}
 			} else {
-				res, err := dbase.InsertTiming(db, t)
-				if err != nil {
-					http.Error(w, err.Error(), http.StatusInternalServerError)
-					return
-				}
-
-				t.ID, err = res.LastInsertId()
+				t.ID, err = dbase.InsertTiming(db, t)
 				if err != nil {
 					http.Error(w, err.Error(), http.StatusInternalServerError)
 					return
@@ -473,13 +467,7 @@ func timingPost(w http.ResponseWriter, r *http.Request) {
 					}
 				}
 			} else {
-				res, err := dbase.InsertTiming(db, t)
-				if err != nil {
-					http.Error(w, err.Error(), http.StatusInternalServerError)
-					return
-				}
-
-				t.ID, err = res.LastInsertId()
+				t.ID, err = dbase.InsertTiming(db, t)
 				if err != nil {
 					http.Error(w, err.Error(), http.StatusInternalServerError)
 					return

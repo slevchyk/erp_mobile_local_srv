@@ -37,24 +37,25 @@ func InsertToken(db *sql.DB, ft models.FirebaseTokens) (sql.Result, error) {
 	return stmt.Exec(ft.UserID, ft.Token)
 }
 
-func InsertTiming(db *sql.DB, t models.Timing) (sql.Result, error) {
-
-	stmt, _ := db.Prepare(`
+func InsertTiming(db *sql.DB, t models.Timing) (int64, error) {
+	var lastInsertId int64
+	err := db.QueryRow(`
 		INSERT INTO
-			timing (				
-				mob_id,
-				acc_id,
-				user_id,
-				date,
-				status,
-				is_turnstile,
-				started_at,
-				ended_at,
-				created_at,
-				updated_at,
-				deleted_at
+			timing (
+					mob_id,
+					acc_id,
+					user_id,
+					date,
+					status,
+					is_turnstile,
+					started_at,
+					ended_at,
+					created_at,
+					updated_at,
+					deleted_at
 				)
-		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11);`)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) RETURNING id`,
+		t.MobID, t.AccID, t.UserID, t.Date, t.Status, t.IsTurnstile, t.StartedAt, t.EndedAt, t.CreatedAt, t.UpdatedAt, t.DeletedAt).Scan(&lastInsertId)
 
-	return stmt.Exec(t.MobID, t.AccID, t.UserID, t.Date, t.Status, t.IsTurnstile, t.StartedAt, t.EndedAt, t.CreatedAt, t.UpdatedAt, t.DeletedAt)
+	return lastInsertId, err
 }
