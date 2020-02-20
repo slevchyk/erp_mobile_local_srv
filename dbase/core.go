@@ -51,14 +51,14 @@ func InitDB(db *sql.DB) {
 			mob_id INTEGER,
 			acc_id TEXT,
 			user_id TEXT,
-			date TEXT,
+			date TIMESTAMP,
 			status TEXT,
 			is_turnstile BOOLEAN,
-			started_at TEXT,
-			ended_at TEXT,
-			created_at TEXT,
-			updated_at TEXT,
-			deleted_at TEXT);
+			started_at TIMESTAMP ,
+			ended_at TIMESTAMP,
+			created_at TIMESTAMP,
+			updated_at TIMESTAMP,
+			deleted_at TIMESTAMP);
 			`)
 	if err != nil {
 		log.Fatal(err)
