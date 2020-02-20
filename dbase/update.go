@@ -75,7 +75,7 @@ func UpdateTiming(db *sql.DB, t models.Timing) (sql.Result, error) {
 	if err != nil {
 		return nil, err
 	}
-	res, err := stmt.Exec(t.MobID, t.AccID, t.UserID, t.Date, t.Status, t.IsTurnstile, t.StartedAt, t.EndedAt, t.CreatedAt, t.UpdatedAt, t.DeletedAt)
+	res, err := stmt.Exec(t.MobID, t.AccID, t.UserID, t.Date, t.Status, t.IsTurnstile, t.StartedAt, t.EndedAt, t.CreatedAt, t.UpdatedAt, t.DeletedAt, t.ID)
 
 	return res, err
 }

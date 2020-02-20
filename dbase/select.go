@@ -2,6 +2,7 @@ package dbase
 
 import (
 	"database/sql"
+	"time"
 )
 
 func SelectFirebaseTokenByUserId(db *sql.DB, userID string) (*sql.Rows, error) {
@@ -47,7 +48,6 @@ func SelectChannelById(db *sql.DB, id int) (*sql.Rows, error) {
 }
 
 func SelectChannelsByUserIdUpdateId(db *sql.DB, userID string, updateID int) (*sql.Rows, error) {
-
 	return db.Query(`
 		SELECT
 			c.id,
@@ -65,7 +65,6 @@ func SelectChannelsByUserIdUpdateId(db *sql.DB, userID string, updateID int) (*s
 }
 
 func SelectTimingById(db *sql.DB, id int64) (*sql.Rows, error) {
-
 	return db.Query(`
 		SELECT
 			t.id,
@@ -86,8 +85,7 @@ func SelectTimingById(db *sql.DB, id int64) (*sql.Rows, error) {
 		t.id=$1`, id)
 }
 
-func SelectTimingByMobIdUserIdDate(db *sql.DB, id int64, userID, date string) (*sql.Rows, error) {
-
+func SelectTimingByMobIdUserIdDate(db *sql.DB, id int64, userID string, date time.Time) (*sql.Rows, error) {
 	return db.Query(`
 		SELECT
 			t.id,
@@ -110,8 +108,7 @@ func SelectTimingByMobIdUserIdDate(db *sql.DB, id int64, userID, date string) (*
 		and t.date=$3`, id, userID, date)
 }
 
-func SelectTimingByAccIdUerIdDate(db *sql.DB, accID, userID, date string) (*sql.Rows, error) {
-
+func SelectTimingByAccIdUerIdDate(db *sql.DB, accID, userID string, date time.Time) (*sql.Rows, error) {
 	return db.Query(`
 		SELECT
 			t.id,
@@ -132,4 +129,26 @@ func SelectTimingByAccIdUerIdDate(db *sql.DB, accID, userID, date string) (*sql.
 		t.ext_id=$1
 		and t.user_id=$2
 		and t.date=$3`, accID, userID, date)
+}
+
+func SelectTimingByUserIdDate(db *sql.DB, userID string, date time.Time) (*sql.Rows, error) {
+	return db.Query(`
+		SELECT
+			t.id,
+			t.mob_id,
+			t.acc_id,
+			t.user_id,
+			t.date,
+			t.status,
+			t.is_turnstile,
+			t.started_at,
+			t.ended_at,
+			t.created_at,
+			t.updated_at,
+			t.deleted_at					
+		FROM 
+			timing t
+		WHERE
+		t.user_id=$1
+		and t.date=$2`, userID, date)
 }

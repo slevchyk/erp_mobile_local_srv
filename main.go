@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+	"time"
 
 	firebase "firebase.google.com/go"
 	"firebase.google.com/go/messaging"
@@ -153,7 +154,6 @@ func channelsHandler(w http.ResponseWriter, r *http.Request) {
 	} else if r.Method == "GET" {
 		channelGet(w, r)
 	}
-
 }
 
 func channelPost(w http.ResponseWriter, r *http.Request) {
@@ -363,35 +363,48 @@ func timingHandler(w http.ResponseWriter, r *http.Request) {
 
 	if r.Method == "POST" {
 		timingPost(w, r)
+	} else if r.Method == "GET" {
+		timingGet(w, r)
 	}
 }
 
 func timingPost(w http.ResponseWriter, r *http.Request) {
 
 	var ts []models.Timing
-	//var t models.Timing
 	var err error
 
+	// параметр який вказує наам з якого об'єкта прийшли дані
+	// це може бути або мобільний пристрій або облікова система
 	fvFrom := r.FormValue("from")
 
+	// перевіримо чи параметр from відповідає одному з двох дозволених значень
 	if fvFrom != Mobile && fvFrom != Accounting {
 		http.Error(w, "wrong \"from\" param", http.StatusBadRequest)
 		return
 	}
 
+	// зчитуємо тіло запиту
 	bs, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
+	// конвертуэмо масив байтів в масив об'єктів типу Timing
 	err = json.Unmarshal(bs, &ts)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	for _, t := range ts {
+	// переребираємо всі елементи масиву об'єктів типу Timing
+	// проводимо синхронізацію з базою даних\
+	for k, _ := range ts {
+
+		// отримуємо вказівник на елемент масиву
+		// щоб була можливість модифікувати його під час синхроназації
+		// t := &v
+		t := &ts[k]
 		if t.ID != 0 {
 			rows, err := dbase.SelectTimingById(db, t.ID)
 			if err != nil {
@@ -404,14 +417,32 @@ func timingPost(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 
-			_, err = dbase.UpdateTiming(db, t)
+			var et models.Timing
+			err = dbase.ScanTiming(rows, &et)
 			if err != nil {
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 				return
 			}
 
+			t.MobID = et.MobID
+			t.AccID = et.AccID
+			if t.UpdatedAt.Time.After(et.UpdatedAt.Time) {
+				_, err = dbase.UpdateTiming(db, *t)
+				if err != nil {
+					http.Error(w, err.Error(), http.StatusInternalServerError)
+					return
+				}
+			} else {
+				t.Status = et.Status
+				t.IsTurnstile = et.IsTurnstile
+				t.StartedAt = et.StartedAt
+				t.EndedAt = et.EndedAt
+				t.CreatedAt = et.CreatedAt
+				t.UpdatedAt = et.UpdatedAt
+				t.DeletedAt = et.DeletedAt
+			}
 		} else if fvFrom == Mobile {
-			rows, err := dbase.SelectTimingByMobIdUserIdDate(db, t.MobID, t.UserID, t.Date)
+			rows, err := dbase.SelectTimingByMobIdUserIdDate(db, t.MobID, t.UserID, t.Date.Time)
 			if err != nil {
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 				return
@@ -427,15 +458,23 @@ func timingPost(w http.ResponseWriter, r *http.Request) {
 
 				t.ID = et.ID
 				t.AccID = et.AccID
-				if t.UpdatedAt > et.UpdatedAt {
-					_, err = dbase.UpdateTiming(db, t)
+				if t.UpdatedAt.Time.After(et.UpdatedAt.Time) {
+					_, err = dbase.UpdateTiming(db, *t)
 					if err != nil {
 						http.Error(w, err.Error(), http.StatusInternalServerError)
 						return
 					}
+				} else {
+					t.Status = et.Status
+					t.IsTurnstile = et.IsTurnstile
+					t.StartedAt = et.StartedAt
+					t.EndedAt = et.EndedAt
+					t.CreatedAt = et.CreatedAt
+					t.UpdatedAt = et.UpdatedAt
+					t.DeletedAt = et.DeletedAt
 				}
 			} else {
-				t.ID, err = dbase.InsertTiming(db, t)
+				t.ID, err = dbase.InsertTiming(db, *t)
 				if err != nil {
 					http.Error(w, err.Error(), http.StatusInternalServerError)
 					return
@@ -443,7 +482,7 @@ func timingPost(w http.ResponseWriter, r *http.Request) {
 			}
 
 		} else if fvFrom == Accounting {
-			rows, err := dbase.SelectTimingByAccIdUerIdDate(db, t.AccID, t.UserID, t.Date)
+			rows, err := dbase.SelectTimingByAccIdUerIdDate(db, t.AccID, t.UserID, t.Date.Time)
 			if err != nil {
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 				return
@@ -459,15 +498,23 @@ func timingPost(w http.ResponseWriter, r *http.Request) {
 
 				t.ID = et.ID
 				t.MobID = et.MobID
-				if t.UpdatedAt > et.UpdatedAt {
-					_, err = dbase.UpdateTiming(db, t)
+				if t.UpdatedAt.Time.After(et.UpdatedAt.Time) {
+					_, err = dbase.UpdateTiming(db, *t)
 					if err != nil {
 						http.Error(w, err.Error(), http.StatusInternalServerError)
 						return
 					}
+				} else {
+					t.Status = et.Status
+					t.IsTurnstile = et.IsTurnstile
+					t.StartedAt = et.StartedAt
+					t.EndedAt = et.EndedAt
+					t.CreatedAt = et.CreatedAt
+					t.UpdatedAt = et.UpdatedAt
+					t.DeletedAt = et.DeletedAt
 				}
 			} else {
-				t.ID, err = dbase.InsertTiming(db, t)
+				t.ID, err = dbase.InsertTiming(db, *t)
 				if err != nil {
 					http.Error(w, err.Error(), http.StatusInternalServerError)
 					return
@@ -476,9 +523,77 @@ func timingPost(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	bs, err = json.Marshal(ts)
+	response := map[string][]models.Timing{"timing": ts}
+	bs, err = json.Marshal(response)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.Write(bs)
+	w.WriteHeader(http.StatusOK)
+}
+
+func timingGet(w http.ResponseWriter, r *http.Request) {
+
+	var ts []models.Timing
+	var t models.Timing
+	var err error
+
+	fvType := r.FormValue("type")
+
+	switch fvType {
+	case "dateuser":
+		{
+			fvDate := r.FormValue("date")
+			fvUserID := r.FormValue("userid")
+
+			var errMessage string
+
+			if fvDate == "" {
+				errMessage += fmt.Sprintf("empty \"date\" param\n")
+			}
+
+			var date time.Time
+			date, err := time.Parse("20060102", fvDate)
+			if err != nil {
+				errMessage += fmt.Sprintf("wrong \"date\" param format\n")
+			}
+
+			if fvUserID == "" {
+				errMessage += fmt.Sprintf("empty \"user id\" param\n")
+			}
+
+			if errMessage != "" {
+				http.Error(w, errMessage, http.StatusBadRequest)
+				return
+			}
+
+			rows, err := dbase.SelectTimingByUserIdDate(db, fvUserID, date)
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusBadRequest)
+				return
+			}
+
+			for rows.Next() {
+				err = dbase.ScanTiming(rows, &t)
+				if err != nil {
+					http.Error(w, err.Error(), http.StatusBadRequest)
+					return
+				}
+
+				ts = append(ts, t)
+			}
+		}
+	default:
+		http.Error(w, "wrong \"type\" param", http.StatusBadRequest)
+		return
+	}
+
+	response := map[string][]models.Timing{"timing": ts}
+	bs, err := json.Marshal(response)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 

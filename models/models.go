@@ -1,9 +1,5 @@
 package models
 
-import (
-	"fmt"
-)
-
 type Config struct {
 	Auth AuthConfig
 	DB   DBConfig

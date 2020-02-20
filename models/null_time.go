@@ -3,13 +3,14 @@ package models
 import (
 	"database/sql/driver"
 	"fmt"
+	"strconv"
 	"time"
 )
 
 //NullTime special type for scan sql rows with Null data for time type variables
 type NullTime struct {
-	Time  time.Time `json:"time"`
-	Valid bool      `json:"valid"` // Valid is true if Time is not NULL
+	Time  time.Time
+	Valid bool
 }
 
 // Scan implements the Scanner interface.
@@ -28,19 +29,42 @@ func (nt NullTime) Value() (driver.Value, error) {
 
 func (nt *NullTime) UnmarshalJSON(data []byte) error {
 	var err error
+
 	asString := string(data)
 
-	if asString == "null" {
-		nt.Valid = false
-	} else if asString == "0" || asString == "false" {
-		nt.Time, err = time.Parse(time.RFC3339, asString)
+	lenStr := len([]rune(asString))
+
+	if lenStr > 4 {
+		asString, err = strconv.Unquote(string(data))
 		if err != nil {
 			nt.Valid = false
-			return err
+			return fmt.Errorf("NullTime unmarshal error: invalid input %s\n%v", asString, err)
+		}
+	}
+
+	if asString == "null" || asString == "nil" || asString == "" {
+		nt.Valid = false
+	} else {
+		nt.Time, err = time.Parse("2006-01-02T15:04:05", asString)
+		if err != nil {
+			nt.Valid = false
+			return fmt.Errorf("NullTime unmarshal error: invalid input %s\n%v", asString, err)
 		}
 		nt.Valid = true
-	} else {
-		return fmt.Errorf("NullTime unmarshal error: invalid input %s", asString)
 	}
+
 	return nil
+}
+
+func (nt *NullTime) MarshalJSON() ([]byte, error) {
+	var asString string
+
+	if nt.Valid {
+		asString = nt.Time.Format("2006-01-02T15:04:05")
+		asString = strconv.Quote(asString)
+	} else {
+		asString = "null"
+	}
+
+	return []byte(asString), nil
 }
