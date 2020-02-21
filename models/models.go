@@ -1,19 +1,19 @@
 package models
 
 type Config struct {
-	Auth AuthConfig
-	DB   DBConfig
+	Auth AuthConfig `json:"auth"`
+	DB   DBConfig   `json:"db"`
 }
 
 type AuthConfig struct {
-	User     string
-	Password string
+	User     string `json:"user"`
+	Password string `json:"password"`
 }
 
 type DBConfig struct {
-	Name     string
-	User     string
-	Password string
+	Name     string `json:"name"`
+	User     string `json:"user"`
+	Password string `json:"password"`
 }
 
 type Channel struct {

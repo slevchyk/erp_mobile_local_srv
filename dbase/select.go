@@ -126,7 +126,7 @@ func SelectTimingByAccIdUerIdDate(db *sql.DB, accID, userID string, date time.Ti
 		FROM 
 			timing t
 		WHERE
-		t.ext_id=$1
+		t.acc_id=$1
 		and t.user_id=$2
 		and t.date=$3`, accID, userID, date)
 }
@@ -151,4 +151,26 @@ func SelectTimingByUserIdDate(db *sql.DB, userID string, date time.Time) (*sql.R
 		WHERE
 		t.user_id=$1
 		and t.date=$2`, userID, date)
+}
+
+func SelectTimingByUpdatedAt(db *sql.DB, date time.Time) (*sql.Rows, error) {
+	return db.Query(`
+		SELECT
+			t.id,
+			t.mob_id,
+			t.acc_id,
+			t.user_id,
+			t.date,
+			t.status,
+			t.is_turnstile,
+			t.started_at,
+			t.ended_at,
+			t.created_at,
+			t.updated_at,
+			t.deleted_at					
+		FROM 
+			timing t
+		WHERE
+		t.updated_at>$1
+		OR t.updated_at IS NULL`, date)
 }

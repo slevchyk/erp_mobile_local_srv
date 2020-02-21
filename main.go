@@ -32,16 +32,9 @@ const (
 func init() {
 	var err error
 
-	cfg = models.Config{
-		Auth: models.AuthConfig{
-			User:     "mobile",
-			Password: "Dq4fS^J&^nqQ(fg4",
-		},
-		DB: models.DBConfig{
-			Name:     "worker_local",
-			User:     "worker",
-			Password: "worker",
-		},
+	cfg, err = LoadConfiguration("config.json")
+	if err != nil {
+		log.Fatal("Can't load configuration file config.json", err.Error())
 	}
 
 	db, _ = dbase.ConnectDB(cfg.DB)
@@ -67,6 +60,24 @@ func main() {
 		panic(err)
 	}
 
+}
+
+func LoadConfiguration(file string) (models.Config, error) {
+	var config models.Config
+
+	cfgFile, err := ioutil.ReadFile(file)
+	if err != nil {
+		log.Println(err)
+		return config, err
+	}
+
+	err = json.Unmarshal(cfgFile, &config)
+	if err != nil {
+		log.Println(err)
+		return config, err
+	}
+
+	return config, nil
 }
 
 func testHandler(w http.ResponseWriter, r *http.Request) {
@@ -488,7 +499,7 @@ func timingPost(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 
-			if !rows.Next() {
+			if rows.Next() {
 				var et models.Timing
 				err = dbase.ScanTiming(rows, &et)
 				if err != nil {
@@ -570,6 +581,43 @@ func timingGet(w http.ResponseWriter, r *http.Request) {
 			}
 
 			rows, err := dbase.SelectTimingByUserIdDate(db, fvUserID, date)
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusBadRequest)
+				return
+			}
+
+			for rows.Next() {
+				err = dbase.ScanTiming(rows, &t)
+				if err != nil {
+					http.Error(w, err.Error(), http.StatusBadRequest)
+					return
+				}
+
+				ts = append(ts, t)
+			}
+		}
+	case "updatedat":
+		{
+			fvDate := r.FormValue("date")
+
+			var errMessage string
+
+			if fvDate == "" {
+				errMessage += fmt.Sprintf("empty \"date\" param\n")
+			}
+
+			var date time.Time
+			date, err := time.Parse("2006-01-02T03:04:05", fvDate)
+			if err != nil {
+				errMessage += fmt.Sprintf("wrong \"date\" param format\n")
+			}
+
+			if errMessage != "" {
+				http.Error(w, errMessage, http.StatusBadRequest)
+				return
+			}
+
+			rows, err := dbase.SelectTimingByUpdatedAt(db, date)
 			if err != nil {
 				http.Error(w, err.Error(), http.StatusBadRequest)
 				return
