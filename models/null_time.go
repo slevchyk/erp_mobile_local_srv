@@ -56,7 +56,7 @@ func (nt *NullTime) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-func (nt *NullTime) MarshalJSON() ([]byte, error) {
+func (nt NullTime) MarshalJSON() ([]byte, error) {
 	var asString string
 
 	if nt.Valid {

@@ -15,3 +15,16 @@ func (bit *ConvertibleBoolean) UnmarshalJSON(data []byte) error {
 	}
 	return nil
 }
+
+// Scan implements the Scanner interface.
+func (bit *ConvertibleBoolean) Scan(value interface{}) error {
+	if value == nil {
+		*bit = false
+	} else if value.(bool) {
+		*bit = true
+	} else {
+		*bit = false
+	}
+
+	return nil
+}

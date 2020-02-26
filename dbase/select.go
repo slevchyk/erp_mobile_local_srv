@@ -182,7 +182,7 @@ func SelectProfileByPhonePin(db *sql.DB, phone, pin string) (*sql.Rows, error) {
 		p.id,
 		p.user_id,
 		p.pin,
-		p,info_card,
+		p.info_card,
 		p.last_name,
 		p.first_name,
 		p.middle_name,
@@ -208,11 +208,11 @@ func SelectProfileByPhonePin(db *sql.DB, phone, pin string) (*sql.Rows, error) {
 		p.skills,
 		p.languages,
 		p.disability,
-		p.pensioner,
+		p.pensioner
 		FROM
 			profiles p
 		WHERE
-		p.phone=$1 
+		p.phone=$1
 		AND p.pin=$2`, phone, pin)
 
 }

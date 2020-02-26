@@ -70,7 +70,7 @@ type Profile struct {
 	CivilStatus         string             `json:"civil_status"`
 	JobPosition         string             `json:"job_position"`
 	Children            string             `json:"children"`
-	Education           string             `json:"education"`
+	Education           int                `json:"education"`
 	Specialty           string             `json:"specialty"`
 	AdditionalEducation string             `json:"additional_education"`
 	LastWorkPlace       string             `json:"last_work_place"`
@@ -78,4 +78,5 @@ type Profile struct {
 	Languages           string             `json:"languages"`
 	Disability          ConvertibleBoolean `json:"disability"`
 	Pensioner           ConvertibleBoolean `json:"pensioner"`
+	Photo               string             `json:"photo"`
 }

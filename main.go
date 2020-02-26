@@ -652,13 +652,13 @@ func timingGet(w http.ResponseWriter, r *http.Request) {
 
 func profileHandler(w http.ResponseWriter, r *http.Request) {
 
-	if r.Method == http.MethodPost {
-		profilePost(w, r)
+	if r.Method == http.MethodGet {
+		profileGet(w, r)
 	}
 
 }
 
-func profilePost(w http.ResponseWriter, r *http.Request) {
+func profileGet(w http.ResponseWriter, r *http.Request) {
 
 	var err error
 	var p models.Profile
@@ -681,9 +681,17 @@ func profilePost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	fvPhone = "+" + fvPhone
+
 	rows, err := dbase.SelectProfileByPhonePin(db, fvPhone, fvPin)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	defer rows.Close()
+
+	if !rows.Next() {
+		http.Error(w, err.Error(), http.StatusNotFound)
 		return
 	}
 

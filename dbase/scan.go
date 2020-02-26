@@ -2,6 +2,7 @@ package dbase
 
 import (
 	"database/sql"
+
 	"github.com/slevchyk/erp_mobile_local_srv/models"
 )
 
@@ -46,7 +47,6 @@ func ScanProfile(rows *sql.Rows, p *models.Profile) error {
 		&p.InfoCard,
 		&p.LastName,
 		&p.FirstName,
-		&p.LastName,
 		&p.MiddleName,
 		&p.ITN,
 		&p.Phone,
@@ -56,7 +56,7 @@ func ScanProfile(rows *sql.Rows, p *models.Profile) error {
 		&p.Address,
 		&p.PassportType,
 		&p.PassportSeries,
-		&p.PassportIssued,
+		&p.PassportNumber,
 		&p.PassportIssued,
 		&p.PassportDate,
 		&p.PassportExpiry,
@@ -67,6 +67,8 @@ func ScanProfile(rows *sql.Rows, p *models.Profile) error {
 		&p.Specialty,
 		&p.AdditionalEducation,
 		&p.LastWorkPlace,
+		&p.Skills,
+		&p.Languages,
 		&p.Disability,
 		&p.Pensioner)
 }
