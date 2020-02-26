@@ -6,13 +6,67 @@ import (
 )
 
 func ScanFirebaseToken(rows *sql.Rows, ft *models.FirebaseTokens) error {
-	return rows.Scan(&ft.ID, &ft.UserID, &ft.Token)
+	return rows.Scan(
+		&ft.ID,
+		&ft.UserID,
+		&ft.Token)
 }
 
 func ScanChannel(rows *sql.Rows, c *models.Channel) error {
-	return rows.Scan(&c.ID, &c.UserID, &c.UpdateID, &c.Type, &c.Title, &c.News, &c.Date)
+	return rows.Scan(
+		&c.ID, &c.UserID,
+		&c.UpdateID,
+		&c.Type,
+		&c.Title,
+		&c.News,
+		&c.Date)
 }
 
 func ScanTiming(rows *sql.Rows, t *models.Timing) error {
-	return rows.Scan(&t.ID, &t.MobID, &t.AccID, &t.UserID, &t.Date, &t.Status, &t.IsTurnstile, &t.StartedAt, &t.EndedAt, &t.CreatedAt, &t.UpdatedAt, &t.DeletedAt)
+	return rows.Scan(
+		&t.ID,
+		&t.MobID,
+		&t.AccID,
+		&t.UserID,
+		&t.Date,
+		&t.Status,
+		&t.IsTurnstile,
+		&t.StartedAt,
+		&t.EndedAt,
+		&t.CreatedAt,
+		&t.UpdatedAt,
+		&t.DeletedAt)
+}
+
+func ScanProfile(rows *sql.Rows, p *models.Profile) error {
+	return rows.Scan(
+		&p.ID,
+		&p.UserID,
+		&p.Pin,
+		&p.InfoCard,
+		&p.LastName,
+		&p.FirstName,
+		&p.LastName,
+		&p.MiddleName,
+		&p.ITN,
+		&p.Phone,
+		&p.Birthday,
+		&p.Email,
+		&p.Gender,
+		&p.Address,
+		&p.PassportType,
+		&p.PassportSeries,
+		&p.PassportIssued,
+		&p.PassportIssued,
+		&p.PassportDate,
+		&p.PassportExpiry,
+		&p.CivilStatus,
+		&p.JobPosition,
+		&p.Children,
+		&p.Education,
+		&p.Specialty,
+		&p.AdditionalEducation,
+		&p.LastWorkPlace,
+		&p.Disability,
+		&p.Pensioner)
 }

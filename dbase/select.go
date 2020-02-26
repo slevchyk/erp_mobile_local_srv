@@ -174,3 +174,45 @@ func SelectTimingByUpdatedAt(db *sql.DB, date time.Time) (*sql.Rows, error) {
 		t.updated_at>$1
 		OR t.updated_at IS NULL`, date)
 }
+
+func SelectProfileByPhonePin(db *sql.DB, phone, pin string) (*sql.Rows, error) {
+
+	return db.Query(`
+		SELECT
+		p.id,
+		p.user_id,
+		p.pin,
+		p,info_card,
+		p.last_name,
+		p.first_name,
+		p.middle_name,
+		p.itn,
+		p.phone,
+		p.birthday,
+		p.email,
+		p.gender,
+		p.address,
+		p.passport_type,
+		p.passport_series,
+		p.passport_number,
+		p.passport_issued,
+		p.passport_date,
+		p.passport_expiry,
+		p.civil_status,
+		p.job_position,
+		p.children,
+		p.education,
+		p.specialty,
+		p.additional_education,
+		p.last_work_place,
+		p.skills,
+		p.languages,
+		p.disability,
+		p.pensioner,
+		FROM
+			profiles p
+		WHERE
+		p.phone=$1 
+		AND p.pin=$2`, phone, pin)
+
+}

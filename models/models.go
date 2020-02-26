@@ -46,3 +46,36 @@ type Timing struct {
 	UpdatedAt   NullTime           `json:"updated_at"`
 	DeletedAt   NullTime           `json:"deleted_at"`
 }
+
+type Profile struct {
+	ID                  int64              `json:"id"`
+	UserID              string             `json:"user_id"`
+	Pin                 string             `json:"pin"`
+	InfoCard            string             `json:"info_card"`
+	LastName            string             `json:"last_name"`
+	FirstName           string             `json:"first_name"`
+	MiddleName          string             `json:"middle_name"`
+	ITN                 string             `json:"itn"`
+	Phone               string             `json:"phone"`
+	Birthday            NullTime           `json:"birthday"`
+	Email               string             `json:"email"`
+	Gender              string             `json:"gender"`
+	Address             string             `json:"address"`
+	PassportType        string             `json:"passport_type"`
+	PassportSeries      string             `json:"passport_series"`
+	PassportNumber      string             `json:"passport_number"`
+	PassportIssued      string             `json:"passport_issued"`
+	PassportDate        NullTime           `json:"passport_date"`
+	PassportExpiry      NullTime           `json:"passport_expiry"`
+	CivilStatus         string             `json:"civil_status"`
+	JobPosition         string             `json:"job_position"`
+	Children            string             `json:"children"`
+	Education           string             `json:"education"`
+	Specialty           string             `json:"specialty"`
+	AdditionalEducation string             `json:"additional_education"`
+	LastWorkPlace       string             `json:"last_work_place"`
+	Skills              string             `json:"skills"`
+	Languages           string             `json:"languages"`
+	Disability          ConvertibleBoolean `json:"disability"`
+	Pensioner           ConvertibleBoolean `json:"pensioner"`
+}

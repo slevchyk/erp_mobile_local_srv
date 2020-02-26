@@ -40,7 +40,7 @@ func init() {
 	db, _ = dbase.ConnectDB(cfg.DB)
 	dbase.InitDB(db)
 
-	opt := option.WithCredentialsFile("willingwork-43b10-firebase-adminsdk-2sf2v-7600960d26.json")
+	opt := option.WithCredentialsFile("firebase-adminsdk.json")
 	app, err = firebase.NewApp(context.Background(), nil, opt)
 	if err != nil {
 		panic(err)
@@ -53,6 +53,7 @@ func main() {
 	http.HandleFunc("/api/channel", basicAuth(channelsHandler))
 	http.HandleFunc("/api/token", basicAuth(tokenHandler))
 	http.HandleFunc("/api/timing", basicAuth(timingHandler))
+	http.HandleFunc("/api/profile", basicAuth(profileHandler))
 	http.HandleFunc("/test", testHandler)
 
 	err := http.ListenAndServe(":8822", nil)
@@ -647,4 +648,63 @@ func timingGet(w http.ResponseWriter, r *http.Request) {
 
 	w.Write(bs)
 	w.WriteHeader(http.StatusOK)
+}
+
+func profileHandler(w http.ResponseWriter, r *http.Request) {
+
+	if r.Method == http.MethodPost {
+		profilePost(w, r)
+	}
+
+}
+
+func profilePost(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	var p models.Profile
+
+	fvPhone := r.FormValue("phone")
+	fvPin := r.FormValue("pin")
+
+	var errMessage string
+
+	if fvPhone == "" {
+		errMessage += fmt.Sprintf("param \"phone\" is empty\n")
+	}
+
+	if fvPin == "" {
+		errMessage += fmt.Sprintf("param \"pin\" is empty\n")
+	}
+
+	if errMessage != "" {
+		http.Error(w, errMessage, http.StatusBadRequest)
+		return
+	}
+
+	rows, err := dbase.SelectProfileByPhonePin(db, fvPhone, fvPin)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	err = dbase.ScanProfile(rows, &p)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	bs, err := json.Marshal(p)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	_, err = w.Write(bs)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+
 }
