@@ -40,7 +40,7 @@ func init() {
 	db, _ = dbase.ConnectDB(cfg.DB)
 	dbase.InitDB(db)
 
-	opt := option.WithCredentialsFile("willingwork-43b10-firebase-adminsdk-2sf2v-7600960d26.json")
+	opt := option.WithCredentialsFile("firebase-adminsdk.json")
 	app, err = firebase.NewApp(context.Background(), nil, opt)
 	if err != nil {
 		panic(err)
