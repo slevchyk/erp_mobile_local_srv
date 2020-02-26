@@ -64,4 +64,41 @@ func InitDB(db *sql.DB) {
 		log.Fatal(err)
 	}
 
+	_, err = db.Exec(`
+		CREATE TABLE IF NOT EXISTS profiles (
+			id SERIAL PRIMARY KEY,
+			user_id TEXT,
+			pin TEXT,
+			info_card TEXT,
+			last_name TEXT,
+			first_name TEXT,
+			middle_name TEXT,
+			itn TEXT,
+			phone TEXT,
+			birthday TIMESTAMP,
+			email TEXT,
+			gender TEXT,
+			address TEXT,
+			passport_type TEXT,
+			passport_series TEXT,
+			passport_number TEXT,
+			passport_issued TEXT,
+			passport_date TIMESTAMP,
+			passport_expiry TIMESTAMP,
+			civil_status TEXT,
+			job_position TEXT,
+			children TEXT,
+			education TEXT,
+			specialty TEXT,
+			additional_education TEXT,
+			last_work_place TEXT,
+			skills TEXT,
+			languages TEXT,
+			disability BOOLEAN,
+			pensioner BOOLEAN);
+		`)
+	if err != nil {
+		log.Fatal(err)
+	}
+
 }
