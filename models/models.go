@@ -69,8 +69,8 @@ type Profile struct {
 	PassportDate        NullTime           `json:"passport_date"`
 	PassportExpiry      NullTime           `json:"passport_expiry"`
 	CivilStatus         string             `json:"civil_status"`
-	JobPosition         string             `json:"job_position"`
 	Children            string             `json:"children"`
+	JobPosition         string             `json:"job_position"`
 	Education           int                `json:"education"`
 	Specialty           string             `json:"specialty"`
 	AdditionalEducation string             `json:"additional_education"`

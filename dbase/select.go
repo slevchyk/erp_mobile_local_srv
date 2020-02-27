@@ -199,9 +199,9 @@ func SelectProfileByPhonePin(db *sql.DB, phone, pin string) (*sql.Rows, error) {
 		p.passport_issued,
 		p.passport_date,
 		p.passport_expiry,
-		p.civil_status,
-		p.job_position,
+		p.civil_status,		
 		p.children,
+		p.job_position,
 		p.education,
 		p.specialty,
 		p.additional_education,
@@ -216,6 +216,50 @@ func SelectProfileByPhonePin(db *sql.DB, phone, pin string) (*sql.Rows, error) {
 			profiles p
 		WHERE
 		p.phone=$1
-		AND p.pin=$2`, phone, pin)
+		AND p.pin=$2
+		AND p.user_id<>""`, phone, pin)
 
+}
+
+func SelectProfileByUserID(db *sql.DB, userID string) (*sql.Rows, error) {
+
+	return db.Query(`
+		SELECT
+		p.id,
+		p.blocked,
+		p.user_id,
+		p.pin,
+		p.info_card,
+		p.last_name,
+		p.first_name,
+		p.middle_name,
+		p.itn,
+		p.phone,
+		p.birthday,
+		p.email,
+		p.gender,
+		p.address,
+		p.passport_type,
+		p.passport_series,
+		p.passport_number,
+		p.passport_issued,
+		p.passport_date,
+		p.passport_expiry,
+		p.civil_status,		
+		p.children,
+		p.job_position,
+		p.education,
+		p.specialty,
+		p.additional_education,
+		p.last_work_place,
+		p.skills,
+		p.languages,
+		p.disability,
+		p.pensioner,
+		p.photo,
+		p.photo_data
+		FROM
+			profiles p
+		WHERE
+		p.user_id=$1`, userID)
 }

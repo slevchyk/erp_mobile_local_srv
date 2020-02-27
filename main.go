@@ -161,9 +161,9 @@ func validate(username, password string) bool {
 
 func channelsHandler(w http.ResponseWriter, r *http.Request) {
 
-	if r.Method == "POST" {
+	if r.Method == http.MethodPost {
 		channelPost(w, r)
-	} else if r.Method == "GET" {
+	} else if r.Method == http.MethodGet {
 		channelGet(w, r)
 	}
 }
@@ -373,9 +373,9 @@ func tokenHandler(w http.ResponseWriter, r *http.Request) {
 
 func timingHandler(w http.ResponseWriter, r *http.Request) {
 
-	if r.Method == "POST" {
+	if r.Method == http.MethodPost {
 		timingPost(w, r)
-	} else if r.Method == "GET" {
+	} else if r.Method == http.MethodGet {
 		timingGet(w, r)
 	}
 }
@@ -654,6 +654,8 @@ func profileHandler(w http.ResponseWriter, r *http.Request) {
 
 	if r.Method == http.MethodGet {
 		profileGet(w, r)
+	} else if r.Method == http.MethodGet {
+		profilePost(w, r)
 	}
 
 }
@@ -691,7 +693,7 @@ func profileGet(w http.ResponseWriter, r *http.Request) {
 	defer rows.Close()
 
 	if !rows.Next() {
-		http.Error(w, err.Error(), http.StatusNotFound)
+		http.Error(w, "can't find any profile by this phone and pin", http.StatusNotFound)
 		return
 	}
 
@@ -715,4 +717,59 @@ func profileGet(w http.ResponseWriter, r *http.Request) {
 
 	w.WriteHeader(http.StatusOK)
 
+}
+
+func profilePost(w http.ResponseWriter, r *http.Request) {
+
+	var p models.Profile
+	var err error
+
+	// зчитуємо тіло запиту
+	bs, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	// конвертуэмо масив байтів в об'єкт типу Profile
+	err = json.Unmarshal(bs, &p)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	if p.UserID == "" {
+		http.Error(w, "user id can'--alt be empty", http.StatusInternalServerError)
+		return
+	}
+
+	rows, err := dbase.SelectProfileByUserID(db, p.UserID)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	if rows.Next() {
+		var existProfile models.Profile
+		err := dbase.ScanProfile(rows, &existProfile)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		p.ID = existProfile.ID
+		_, err = dbase.UpdateProfile(db, p)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+	} else {
+		_, err = dbase.InsertProfile(db, p)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+	}
+
+	w.WriteHeader(http.StatusOK)
 }

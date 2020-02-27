@@ -75,7 +75,103 @@ func UpdateTiming(db *sql.DB, t models.Timing) (sql.Result, error) {
 	if err != nil {
 		return nil, err
 	}
-	res, err := stmt.Exec(t.MobID, t.AccID, t.UserID, t.Date, t.Status, t.IsTurnstile, t.StartedAt, t.EndedAt, t.CreatedAt, t.UpdatedAt, t.DeletedAt, t.ID)
+	res, err := stmt.Exec(
+		t.MobID,
+		t.AccID,
+		t.UserID,
+		t.Date,
+		t.Status,
+		t.IsTurnstile,
+		t.StartedAt,
+		t.EndedAt,
+		t.CreatedAt,
+		t.UpdatedAt,
+		t.DeletedAt,
+		t.ID)
+
+	return res, err
+}
+
+func UpdateProfile(db *sql.DB, p models.Profile) (sql.Result, error) {
+
+	var err error
+
+	stmt, err := db.Prepare(`
+			UPDATE
+				profiles
+			SET
+				blocked = $1,
+				user_id = $2,
+				pin = $3,
+				info_card = $4,
+				last_name = $5,
+				first_name = $6,
+				middle_name = $7,
+				itn = $8,
+				phone = $9,
+				birthday = $10,
+				email = $11,
+				gender = $12,
+				address = $13,
+				passport_type = $14,
+				passport_series = $15,
+				passport_number = $16,
+				passport_issued = $17,
+				passport_date = $18,
+				passport_expiry = $19,
+				civil_status = $20,				
+				children = $21,
+				job_position = $22,
+				education = $23,
+				specialty = $24,
+				additional_education = $25,
+				last_work_place = $26,
+				skills = $27,
+				languages = $28,
+				disability = $29,
+				pensioner = $30,
+				photo = $31,
+				photo_data = $32			
+			WHERE
+				id=$33
+			`)
+	if err != nil {
+		return nil, err
+	}
+	res, err := stmt.Exec(
+		p.Blocked,
+		p.UserID,
+		p.Pin,
+		p.InfoCard,
+		p.LastName,
+		p.FirstName,
+		p.MiddleName,
+		p.ITN,
+		p.Phone,
+		p.Birthday,
+		p.Email,
+		p.Gender,
+		p.Address,
+		p.PassportType,
+		p.PassportSeries,
+		p.PassportNumber,
+		p.PassportIssued,
+		p.PassportDate,
+		p.PassportExpiry,
+		p.CivilStatus,
+		p.Children,
+		p.JobPosition,
+		p.Education,
+		p.Specialty,
+		p.AdditionalEducation,
+		p.LastWorkPlace,
+		p.Skills,
+		p.Languages,
+		p.Disability,
+		p.Pensioner,
+		p.Photo,
+		p.PhotoData,
+		p.ID)
 
 	return res, err
 }
