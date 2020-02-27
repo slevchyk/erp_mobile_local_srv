@@ -95,8 +95,8 @@ func InitDB(db *sql.DB) {
 			last_work_place TEXT DEFAULT '',
 			skills TEXT DEFAULT '',
 			languages TEXT DEFAULT '',
-			disability BOOLEAN,
-			pensioner BOOLEAN,
+			disability BOOLEAN DEFAULT false,
+			pensioner BOOLEAN DEFAULT false,
 			photo TEXT DEFAULT '',
 			photo_data TEXT DEFAULT '');
 			`)
