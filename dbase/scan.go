@@ -42,6 +42,7 @@ func ScanTiming(rows *sql.Rows, t *models.Timing) error {
 func ScanProfile(rows *sql.Rows, p *models.Profile) error {
 	return rows.Scan(
 		&p.ID,
+		&p.Blocked,
 		&p.UserID,
 		&p.Pin,
 		&p.InfoCard,
@@ -70,5 +71,7 @@ func ScanProfile(rows *sql.Rows, p *models.Profile) error {
 		&p.Skills,
 		&p.Languages,
 		&p.Disability,
-		&p.Pensioner)
+		&p.Pensioner,
+		&p.Photo,
+		&p.PhotoData)
 }

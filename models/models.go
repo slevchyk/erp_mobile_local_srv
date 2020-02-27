@@ -48,7 +48,7 @@ type Timing struct {
 }
 
 type Profile struct {
-	ID                  int64              `json:"id"`
+	ID                  int64              `json:"-"`
 	Blocked             ConvertibleBoolean `json:"blocked"`
 	UserID              string             `json:"user_id"`
 	Pin                 string             `json:"pin"`

@@ -59,3 +59,26 @@ func InsertTiming(db *sql.DB, t models.Timing) (int64, error) {
 
 	return lastInsertId, err
 }
+
+func InsertProfile(db *sql.DB, p models.Profile) (int64, error) {
+	var lastInsertId int64
+	err := db.QueryRow(`
+		INSERT INTO
+			timing (
+					mob_id,
+					acc_id,
+					user_id,
+					date,
+					status,
+					is_turnstile,
+					started_at,
+					ended_at,
+					created_at,
+					updated_at,
+					deleted_at
+				)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) RETURNING id`,
+		p.UserID).Scan(&lastInsertId)
+
+	return lastInsertId, err
+}
