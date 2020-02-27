@@ -41,20 +41,39 @@ func InsertTiming(db *sql.DB, t models.Timing) (int64, error) {
 	var lastInsertId int64
 	err := db.QueryRow(`
 		INSERT INTO
-			timing (
-					mob_id,
-					acc_id,
-					user_id,
-					date,
-					status,
-					is_turnstile,
-					started_at,
-					ended_at,
-					created_at,
-					updated_at,
-					deleted_at
-				)
-		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) RETURNING id`,
+			profiles (	
+				blocked,
+				user_id,
+				pin,
+				info_card,
+				last_name,
+				first_name,
+				middle_name,
+				itn,
+				phone,
+				birthday,
+				email,
+				gender,
+				address,
+				passport_type,
+				passport_series,
+				passport_number,
+				passport_issued,
+				passport_date,
+				passport_expiry,
+				civil_status,
+				job_position,
+				children,
+				education,
+				specialty,
+				additional_education,
+				last_work_place,
+				skills,
+				languages,
+				disability,
+				pensioner,
+				photo)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27, $28, $29, $30, $31) RETURNING id`,
 		t.MobID, t.AccID, t.UserID, t.Date, t.Status, t.IsTurnstile, t.StartedAt, t.EndedAt, t.CreatedAt, t.UpdatedAt, t.DeletedAt).Scan(&lastInsertId)
 
 	return lastInsertId, err

@@ -210,7 +210,7 @@ func SelectProfileByPhonePin(db *sql.DB, phone, pin string) (*sql.Rows, error) {
 		p.languages,
 		p.disability,
 		p.pensioner,
-		p.photo,
+		p.photo
 		FROM
 			profiles p
 		WHERE

@@ -96,7 +96,9 @@ func InitDB(db *sql.DB) {
 			skills TEXT DEFAULT '',
 			languages TEXT DEFAULT '',
 			disability BOOLEAN,
-			pensioner BOOLEAN);
+			pensioner BOOLEAN,
+			photo TEXT DEFAULT '',
+			photo_data TEXT DEFAULT '');
 			`)
 	if err != nil {
 		log.Fatal(err)

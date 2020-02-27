@@ -70,5 +70,6 @@ func ScanProfile(rows *sql.Rows, p *models.Profile) error {
 		&p.Skills,
 		&p.Languages,
 		&p.Disability,
-		&p.Pensioner)
+		&p.Pensioner,
+		&p.Photo)
 }
