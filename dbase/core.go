@@ -67,9 +67,10 @@ func InitDB(db *sql.DB) {
 	_, err = db.Exec(`
 		CREATE TABLE IF NOT EXISTS profiles (
 			id SERIAL PRIMARY KEY,
+			blocked BOOLEAN DEFAULT false,
 			user_id TEXT DEFAULT '',
 			pin TEXT DEFAULT '',
-			info_card TEXT DEFAULT '',
+			info_card INTEGER DEFAULT 0,
 			last_name TEXT DEFAULT '',
 			first_name TEXT DEFAULT '',
 			middle_name TEXT DEFAULT '',

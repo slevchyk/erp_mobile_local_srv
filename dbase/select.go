@@ -180,6 +180,7 @@ func SelectProfileByPhonePin(db *sql.DB, phone, pin string) (*sql.Rows, error) {
 	return db.Query(`
 		SELECT
 		p.id,
+		p.blocked,
 		p.user_id,
 		p.pin,
 		p.info_card,
@@ -208,7 +209,8 @@ func SelectProfileByPhonePin(db *sql.DB, phone, pin string) (*sql.Rows, error) {
 		p.skills,
 		p.languages,
 		p.disability,
-		p.pensioner
+		p.pensioner,
+		p.photo,
 		FROM
 			profiles p
 		WHERE

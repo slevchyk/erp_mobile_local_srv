@@ -49,9 +49,10 @@ type Timing struct {
 
 type Profile struct {
 	ID                  int64              `json:"id"`
+	Blocked             ConvertibleBoolean `json:"blocked"`
 	UserID              string             `json:"user_id"`
 	Pin                 string             `json:"pin"`
-	InfoCard            string             `json:"info_card"`
+	InfoCard            int                `json:"info_card"`
 	LastName            string             `json:"last_name"`
 	FirstName           string             `json:"first_name"`
 	MiddleName          string             `json:"middle_name"`
@@ -79,4 +80,5 @@ type Profile struct {
 	Disability          ConvertibleBoolean `json:"disability"`
 	Pensioner           ConvertibleBoolean `json:"pensioner"`
 	Photo               string             `json:"photo"`
+	PhotoData           string             `json:"photo_data"`
 }
