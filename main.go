@@ -905,7 +905,7 @@ func profileHandler(w http.ResponseWriter, r *http.Request) {
 
 	if r.Method == http.MethodGet {
 		profileGet(w, r)
-	} else if r.Method == http.MethodGet {
+	} else if r.Method == http.MethodPost {
 		profilePost(w, r)
 	}
 

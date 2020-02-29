@@ -45,7 +45,16 @@ func (nt *NullTime) UnmarshalJSON(data []byte) error {
 	if asString == "null" || asString == "nil" || asString == "" {
 		nt.Valid = false
 	} else {
+
+		// lenStr := len([]rune(asString))
+		// if lenStr == 10 {
+		// 	nt.Time, err = time.Parse("2006-01-02", asString)
+		// } else {
+		// 	nt.Time, err = time.Parse("2006-01-02T15:04:05", asString)
+		// }
+
 		nt.Time, err = time.Parse("2006-01-02T15:04:05", asString)
+
 		if err != nil {
 			nt.Valid = false
 			return fmt.Errorf("NullTime unmarshal error: invalid input %s\n%v", asString, err)

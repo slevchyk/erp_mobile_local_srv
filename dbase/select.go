@@ -217,7 +217,7 @@ func SelectProfileByPhonePin(db *sql.DB, phone, pin string) (*sql.Rows, error) {
 		WHERE
 		p.phone=$1
 		AND p.pin=$2
-		AND p.user_id<>""`, phone, pin)
+		AND p.user_id<>$3`, phone, pin, "")
 
 }
 
