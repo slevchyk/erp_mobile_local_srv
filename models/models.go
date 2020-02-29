@@ -1,8 +1,9 @@
 package models
 
 type Config struct {
-	Auth AuthConfig `json:"auth"`
-	DB   DBConfig   `json:"db"`
+	Auth       AuthConfig `json:"auth"`
+	DB         DBConfig   `json:"db"`
+	WinService winService `json:"win_service"`
 }
 
 type AuthConfig struct {
@@ -14,6 +15,12 @@ type DBConfig struct {
 	Name     string `json:"name"`
 	User     string `json:"user"`
 	Password string `json:"password"`
+}
+
+type winService struct {
+	Name        string `json:"name"`
+	LongName    string `json:"long_name"`
+	Description string `json:"description"`
 }
 
 type Channel struct {
