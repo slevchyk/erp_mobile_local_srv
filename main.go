@@ -59,10 +59,11 @@ func init() {
 	db, _ = dbase.ConnectDB(cfg.DB)
 	dbase.InitDB(db)
 
-	opt := option.WithCredentialsFile("firebase-adminsdk.json")
+	opt := option.WithCredentialsFile(fmt.Sprintf("%sfirebase-adminsdk.json", dir))
 	app, err = firebase.NewApp(context.Background(), nil, opt)
 	if err != nil {
 		panic(err)
+		log.Fatalf("Can't load configuration file firebase-adminsdk.json%s", err.Error())
 	}
 }
 
@@ -79,8 +80,6 @@ func main() {
 	}
 
 	if len(os.Args) == 2 {
-
-		log.Printf("command is: %s", os.Args[1])
 
 		cmd := strings.ToLower(os.Args[1])
 		switch cmd {
