@@ -5,10 +5,6 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
-	"golang.org/x/sys/windows/svc"
-	"golang.org/x/sys/windows/svc/debug"
-	"golang.org/x/sys/windows/svc/eventlog"
-	"golang.org/x/sys/windows/svc/mgr"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -17,6 +13,11 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"golang.org/x/sys/windows/svc"
+	"golang.org/x/sys/windows/svc/debug"
+	"golang.org/x/sys/windows/svc/eventlog"
+	"golang.org/x/sys/windows/svc/mgr"
 
 	firebase "firebase.google.com/go"
 	"firebase.google.com/go/messaging"
@@ -58,10 +59,11 @@ func init() {
 	db, _ = dbase.ConnectDB(cfg.DB)
 	dbase.InitDB(db)
 
-	opt := option.WithCredentialsFile("firebase-adminsdk.json")
+	opt := option.WithCredentialsFile(fmt.Sprintf("%sfirebase-adminsdk.json", dir))
 	app, err = firebase.NewApp(context.Background(), nil, opt)
 	if err != nil {
 		panic(err)
+		log.Fatalf("Can't load configuration file firebase-adminsdk.json%s", err.Error())
 	}
 }
 
@@ -90,6 +92,7 @@ func main() {
 			err = removeService(cfg.WinService.Name)
 		case "start":
 			err = startService(cfg.WinService.Name)
+			log.Printf("failed to  %v", err)
 		case "stop":
 			err = controlService(cfg.WinService.Name, svc.Stop, svc.Stopped)
 		case "pause":
@@ -120,6 +123,7 @@ func webApp() {
 
 	err := http.ListenAndServe(":8822", nil)
 	if err != nil {
+		log.Printf("err is %s", err)
 		panic(err)
 	}
 }

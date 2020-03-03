@@ -2,6 +2,7 @@ package models
 
 type Config struct {
 	Auth       AuthConfig `json:"auth"`
+	MainAuth   AuthConfig `json:main_auth`
 	DB         DBConfig   `json:"db"`
 	WinService winService `json:"win_service"`
 }
