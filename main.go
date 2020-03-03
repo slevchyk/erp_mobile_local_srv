@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"database/sql"
 	"encoding/base64"
 	"encoding/json"
@@ -1040,7 +1041,22 @@ func profilePost(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		http.Post()
+		resp, err := http.Post(cfg.MainSrv, "application/json", bytes.NewBuffer(bs))
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		if resp.StatusCode != http.StatusOK {
+			bs, err := ioutil.ReadAll(resp.Body)
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
+
+			http.Error(w, string(bs), resp.StatusCode)
+			return
+		}
 
 	}
 

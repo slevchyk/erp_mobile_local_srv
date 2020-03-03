@@ -2,7 +2,8 @@ package models
 
 type Config struct {
 	Auth       AuthConfig `json:"auth"`
-	MainAuth   AuthConfig `json:main_auth`
+	MainSrv    string     `json:"main_srv"`
+	MainAuth   AuthConfig `json:"main_auth"`
 	DB         DBConfig   `json:"db"`
 	WinService winService `json:"win_service"`
 }
@@ -13,7 +14,7 @@ type AuthConfig struct {
 }
 
 type DBConfig struct {
-	Name     string `json:"name"`git
+	Name     string `json:"name"`
 	User     string `json:"user"`
 	Password string `json:"password"`
 }
