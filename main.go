@@ -975,6 +975,8 @@ func profilePost(w http.ResponseWriter, r *http.Request) {
 	var p models.Profile
 	var err error
 
+	fvFrom := r.FormValue("from")
+
 	// зчитуємо тіло запиту
 	bs, err := ioutil.ReadAll(r.Body)
 	if err != nil {
@@ -990,7 +992,7 @@ func profilePost(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if p.UserID == "" {
-		http.Error(w, "user id can'--alt be empty", http.StatusInternalServerError)
+		http.Error(w, "user id can not be empty", http.StatusInternalServerError)
 		return
 	}
 
@@ -1020,6 +1022,22 @@ func profilePost(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
+	}
+
+	if fvFrom == "accounting" {
+
+		cu := map[string]string{
+			"phone": p.Phone,
+			"pin":   p.Pin}
+
+		bs, err := json.Marshal(cu)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		http.Post()
+
 	}
 
 	w.WriteHeader(http.StatusOK)

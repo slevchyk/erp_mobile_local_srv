@@ -12,7 +12,7 @@ type AuthConfig struct {
 }
 
 type DBConfig struct {
-	Name     string `json:"name"`
+	Name     string `json:"name"`git
 	User     string `json:"user"`
 	Password string `json:"password"`
 }
