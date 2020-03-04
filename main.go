@@ -64,7 +64,6 @@ func init() {
 	app, err = firebase.NewApp(context.Background(), nil, opt)
 	if err != nil {
 		panic(err)
-		log.Fatalf("Can't load configuration file firebase-adminsdk.json%s", err.Error())
 	}
 }
 
@@ -1041,10 +1040,13 @@ func profilePost(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		resp, err := http.Post(cfg.MainSrv, "application/json", bytes.NewBuffer(bs))
+		hc := &http.Client{}
+		URL := cfg.MainSrv + "/api/clouddbuser"
+		req, err := http.NewRequest("POST", URL, bytes.NewBuffer(bs))
+		req.SetBasicAuth(cfg.MainAuth.User, cfg.MainAuth.Password)
+		resp, err := hc.Do(req)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
 		}
 
 		if resp.StatusCode != http.StatusOK {
