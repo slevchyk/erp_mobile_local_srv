@@ -107,7 +107,7 @@ func InsertProfile(db *sql.DB, p models.Profile) (int64, error) {
 		p.FirstName,
 		p.MiddleName,
 		p.ITN,
-		p.Photo,
+		p.Phone,
 		p.Birthday,
 		p.Email,
 		p.Gender,
