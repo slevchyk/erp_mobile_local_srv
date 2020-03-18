@@ -210,7 +210,7 @@ func UpdateHelpDesk(db *sql.DB, hd models.HelpDesk) (sql.Result, error) {
 		hd.Answer,
 		hd.AnsweredBy,
 		hd.AnsweredAt,
-		hd.IsModifiedByMob,
+		hd.IsModifiedMob,
 		hd.IsModifiedAcc,
 		hd.ID)
 	return res, err

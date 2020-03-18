@@ -87,7 +87,7 @@ func ScanHelpdesk(rows *sql.Rows, hd *models.HelpDesk) error {
 		&hd.Answer,
 		&hd.AnsweredBy,
 		&hd.AnsweredAt,
-		&hd.IsModifiedByMob,
+		&hd.IsModifiedMob,
 		&hd.IsModifiedAcc,
 	)
 }

@@ -173,7 +173,7 @@ func InsertHelpDesk(db *sql.DB, hd models.HelpDesk) (int64, error) {
 		hd.Answer,
 		hd.AnsweredBy,
 		hd.AnsweredAt,
-		hd.IsModifiedByMob,
+		hd.IsModifiedMob,
 		hd.IsModifiedAcc).
 		Scan(&lastInsertId)
 
