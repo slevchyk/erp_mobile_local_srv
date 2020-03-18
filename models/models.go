@@ -91,3 +91,17 @@ type Profile struct {
 	Photo               string             `json:"photo"`
 	PhotoData           string             `json:"photo_data"`
 }
+
+type HelpDesk struct {
+	ID            int                `json:"id"`
+	UserID        string             `json:"user_id"`
+	Date          NullTime           `json:"date"`
+	Title         string             `json:"title"`
+	Body          string             `json:"body"`
+	Status        string             `json:"status"`
+	Answer        string             `json:"answer"`
+	AnsweredBy    string             `json:"answered_by"`
+	AnsweredAt    NullTime           `json:"answered_at"`
+	IsModifiedMob ConvertibleBoolean `json:"-"`
+	IsModifiedAcc ConvertibleBoolean `json:"-"`
+}

@@ -75,3 +75,19 @@ func ScanProfile(rows *sql.Rows, p *models.Profile) error {
 		&p.Photo,
 		&p.PhotoData)
 }
+
+func ScanHelpdesk(rows *sql.Rows, hd *models.HelpDesk) error {
+	return rows.Scan(
+		&hd.ID,
+		&hd.UserID,
+		&hd.Date,
+		&hd.Title,
+		&hd.Body,
+		&hd.Status,
+		&hd.Answer,
+		&hd.AnsweredBy,
+		&hd.AnsweredAt,
+		&hd.IsModifiedByMob,
+		&hd.IsModifiedAcc,
+	)
+}

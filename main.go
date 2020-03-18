@@ -40,6 +40,11 @@ const (
 	Accounting = "accounting"
 )
 
+const (
+	ErrorNil = iota
+	ErrorCantUpdate
+)
+
 func init() {
 	var err error
 	var dir string
@@ -119,6 +124,7 @@ func webApp() {
 	http.HandleFunc("/api/token", basicAuth(tokenHandler))
 	http.HandleFunc("/api/timing", basicAuth(timingHandler))
 	http.HandleFunc("/api/profile", basicAuth(profileHandler))
+	http.HandleFunc("/api/helpdesk", basicAuth(helpdeskHandler))
 	http.HandleFunc("/test", testHandler)
 
 	err := http.ListenAndServe(":8822", nil)
@@ -1063,4 +1069,208 @@ func profilePost(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.WriteHeader(http.StatusOK)
+}
+
+func helpdeskHandler(w http.ResponseWriter, r *http.Request) {
+
+	if r.Method == http.MethodPost {
+		helpdeskPost(w, r)
+	} else if r.Method == http.MethodGet {
+		helpdeskGet(w, r)
+	}
+
+}
+
+func helpdeskPost(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	var hd models.HelpDesk
+
+	fvFrom := r.FormValue("from")
+
+	// перевіримо чи параметр from відповідає одному з двох дозволених значень
+	if fvFrom == Mobile {
+		hd.IsModifiedMob = true
+	} else if fvFrom == Accounting {
+		hd.IsModifiedAcc = true
+	} else {
+		http.Error(w, "wrong \"from\" param", http.StatusBadRequest)
+		return
+	}
+
+	// зчитуємо тіло запиту
+	bs, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	// конвертуэмо масив байтів в об'єкт типу HelpDesk
+	err = json.Unmarshal(bs, &hd)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	if hd.ID == 0 {
+		id, err := dbase.InsertHelpDesk(db, hd)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		answer := map[string]int64{
+			"id": id}
+
+		bs, err := json.Marshal(answer)
+
+		_, err = w.Write(bs)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		w.WriteHeader(http.StatusOK)
+
+		return
+	} else {
+
+		if hd.IsModifiedMob {
+			_, err = dbase.UpdateHelpDesk(db, hd)
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
+		} else {
+			var existHelpDesk models.HelpDesk
+
+			rows, err := dbase.SelectHelpDeskByID(db, hd.ID)
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
+
+			err = dbase.ScanHelpdesk(rows, &existHelpDesk)
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
+
+			if existHelpDesk.IsModifiedMob {
+				http.Error(w, "object already has been updated by mobile database", http.StatusBadRequest)
+				return
+			}
+
+			_, err = dbase.UpdateHelpDesk(db, hd)
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
+
+			w.WriteHeader(http.StatusOK)
+			return
+		}
+	}
+
+}
+
+func helpdeskGet(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	var hd models.HelpDesk
+
+	fvID := r.FormValue("id")
+	fvFor := r.FormValue("for")
+
+	if fvID == "" && fvFor == "" {
+		http.Error(w, "incorrect params", http.StatusBadRequest)
+		return
+	}
+
+	if fvID != "" {
+
+		id, err := strconv.Atoi(fvID)
+		if err != nil {
+			http.Error(w, "wrong \"id\" param", http.StatusBadRequest)
+			return
+		}
+
+		rows, err := dbase.SelectHelpDeskByID(db, id)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		if !rows.Next() {
+			http.Error(w, "cant find help_desk by this id", http.StatusBadRequest)
+			return
+		}
+		defer rows.Close()
+
+		err = dbase.ScanHelpdesk(rows, &hd)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		bs, err := json.Marshal(hd)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		_, err = w.Write(bs)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		w.WriteHeader(http.StatusOK)
+		return
+	} else if fvFor != "" {
+
+		var hds []models.HelpDesk
+		var rows *sql.Rows
+
+		if fvFor == Mobile {
+			rows, err = dbase.SelectHelpDeskModifiedByAcc(db)
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
+		} else if fvFor == Accounting {
+			rows, err = dbase.SelectHelpDeskModifiedByMob(db)
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
+		} else {
+			http.Error(w, "incorrect \"for\" param", http.StatusBadRequest)
+		}
+		defer rows.Close()
+
+		for rows.Next() {
+			err = dbase.ScanHelpdesk(rows, &hd)
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
+			s
+			hds = append(hds, hd)
+		}
+
+		bs, err := json.Marshal(hds)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		_, err = w.Write(bs)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		w.WriteHeader(http.StatusOK)
+		return
+	}
+
+	http.Error(w, "bad params", http.StatusBadRequest)
 }

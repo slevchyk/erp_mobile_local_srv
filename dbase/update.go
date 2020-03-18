@@ -50,6 +50,7 @@ func UpdateFirebaseTokens(db *sql.DB, ft models.FirebaseTokens) (sql.Result, err
 
 	return res, err
 }
+
 func UpdateTiming(db *sql.DB, t models.Timing) (sql.Result, error) {
 
 	var err error
@@ -173,5 +174,44 @@ func UpdateProfile(db *sql.DB, p models.Profile) (sql.Result, error) {
 		p.PhotoData,
 		p.ID)
 
+	return res, err
+}
+
+func UpdateHelpDesk(db *sql.DB, hd models.HelpDesk) (sql.Result, error) {
+
+	var err error
+
+	stmt, err := db.Prepare(`
+			UPDATE
+				help_desk
+			SET
+				user_id = $1,
+				date = $2,
+				title = $3,
+				body = $4,
+				status = $5,
+				answer = $6,
+				answered_by = $7,
+				answered_at = $8,
+				is_modified_mob = $9,
+				is_modified_acc = $10				
+			WHERE
+				id=$11
+			`)
+	if err != nil {
+		return nil, err
+	}
+	res, err := stmt.Exec(
+		hd.UserID,
+		hd.Date,
+		hd.Title,
+		hd.Body,
+		hd.Status,
+		hd.Answer,
+		hd.AnsweredBy,
+		hd.AnsweredAt,
+		hd.IsModifiedByMob,
+		hd.IsModifiedAcc,
+		hd.ID)
 	return res, err
 }

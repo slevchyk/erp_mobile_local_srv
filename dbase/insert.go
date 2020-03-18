@@ -55,7 +55,18 @@ func InsertTiming(db *sql.DB, t models.Timing) (int64, error) {
 				deleted_at
 			)
 		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) RETURNING id`,
-		t.MobID, t.AccID, t.UserID, t.Date, t.Status, t.IsTurnstile, t.StartedAt, t.EndedAt, t.CreatedAt, t.UpdatedAt, t.DeletedAt).Scan(&lastInsertId)
+		t.MobID,
+		t.AccID,
+		t.UserID,
+		t.Date,
+		t.Status,
+		t.IsTurnstile,
+		t.StartedAt,
+		t.EndedAt,
+		t.CreatedAt,
+		t.UpdatedAt,
+		t.DeletedAt).
+		Scan(&lastInsertId)
 
 	return lastInsertId, err
 }
@@ -130,8 +141,41 @@ func InsertProfile(db *sql.DB, p models.Profile) (int64, error) {
 		p.Disability,
 		p.Pensioner,
 		p.Photo,
-		p.PhotoData,
-	).Scan(&lastInsertId)
+		p.PhotoData).
+		Scan(&lastInsertId)
+
+	return lastInsertId, err
+}
+
+func InsertHelpDesk(db *sql.DB, hd models.HelpDesk) (int64, error) {
+	var lastInsertId int64
+
+	err := db.QueryRow(`
+		INSERT INTO
+			help_desk (
+				user_id,
+				date,
+			    title,
+			    body,
+			    status,
+			    answer,
+			    answered_by,
+			    answered_at,
+			    is_modified_mob,
+			    is_modified_acc
+			)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING id`,
+		hd.UserID,
+		hd.Date,
+		hd.Title,
+		hd.Body,
+		hd.Status,
+		hd.Answer,
+		hd.AnsweredBy,
+		hd.AnsweredAt,
+		hd.IsModifiedByMob,
+		hd.IsModifiedAcc).
+		Scan(&lastInsertId)
 
 	return lastInsertId, err
 }
