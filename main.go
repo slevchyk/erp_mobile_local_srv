@@ -1253,7 +1253,7 @@ func helpdeskGet(w http.ResponseWriter, r *http.Request) {
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 				return
 			}
-			s
+
 			hds = append(hds, hd)
 		}
 
