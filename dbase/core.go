@@ -122,4 +122,21 @@ func InitDB(db *sql.DB) {
 		log.Fatal(err)
 	}
 
+	_, err = db.Exec(`
+		CREATE TABLE IF NOT EXISTS pay_desk (
+			id SERIAL PRIMARY KEY,
+			user_id TEXT,
+			amount FLOAT,
+			payment TEXT,
+			document_number TEXT,
+			document_date TIMESTAMP,
+			created_at TIMESTAMP,
+			updated_at TIMESTAMP,			
+			is_modified_mob BOOLEAN,
+			is_modified_acc BOOLEAN);
+			`)
+	if err != nil {
+		log.Fatal(err)
+	}
+
 }

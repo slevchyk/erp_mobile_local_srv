@@ -179,3 +179,34 @@ func InsertHelpDesk(db *sql.DB, hd models.HelpDesk) (int64, error) {
 
 	return lastInsertId, err
 }
+
+func InsertPayDesk(db *sql.DB, pd models.PayDesk) (int64, error) {
+	var lastInsertId int64
+
+	err := db.QueryRow(`
+		INSERT INTO
+			pay_desk (
+				user_id,
+				amount,
+			    payment,
+			    document_number,
+			    document_date,
+			    created_at,
+			    updated_at,			    
+			    is_modified_mob,
+			    is_modified_acc
+			)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING id`,
+		pd.UserID,
+		pd.Amount,
+		pd.Payment,
+		pd.DocumentNumber,
+		pd.DocumentDate,
+		pd.CreatedAt,
+		pd.UpdatedAt,
+		pd.IsModifiedMob,
+		pd.IsModifiedAcc).
+		Scan(&lastInsertId)
+
+	return lastInsertId, err
+}

@@ -124,7 +124,8 @@ func webApp() {
 	http.HandleFunc("/api/token", basicAuth(tokenHandler))
 	http.HandleFunc("/api/timing", basicAuth(timingHandler))
 	http.HandleFunc("/api/profile", basicAuth(profileHandler))
-	http.HandleFunc("/api/helpdesk", basicAuth(helpdeskHandler))
+	http.HandleFunc("/api/helpdesk", basicAuth(helpDeskHandler))
+	http.HandleFunc("/api/paydesk", basicAuth(payDeskHandler))
 	http.HandleFunc("/test", testHandler)
 
 	err := http.ListenAndServe(":8822", nil)
@@ -1071,17 +1072,17 @@ func profilePost(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 }
 
-func helpdeskHandler(w http.ResponseWriter, r *http.Request) {
+func helpDeskHandler(w http.ResponseWriter, r *http.Request) {
 
 	if r.Method == http.MethodPost {
-		helpdeskPost(w, r)
+		helpDeskPost(w, r)
 	} else if r.Method == http.MethodGet {
-		helpdeskGet(w, r)
+		helpDeskGet(w, r)
 	}
 
 }
 
-func helpdeskPost(w http.ResponseWriter, r *http.Request) {
+func helpDeskPost(w http.ResponseWriter, r *http.Request) {
 
 	var err error
 	var hd models.HelpDesk
@@ -1149,7 +1150,7 @@ func helpdeskPost(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 
-			err = dbase.ScanHelpdesk(rows, &existHelpDesk)
+			err = dbase.ScanHelpDesk(rows, &existHelpDesk)
 			if err != nil {
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 				return
@@ -1170,10 +1171,9 @@ func helpdeskPost(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
-
 }
 
-func helpdeskGet(w http.ResponseWriter, r *http.Request) {
+func helpDeskGet(w http.ResponseWriter, r *http.Request) {
 
 	var err error
 	var hd models.HelpDesk
@@ -1206,7 +1206,7 @@ func helpdeskGet(w http.ResponseWriter, r *http.Request) {
 		}
 		defer rows.Close()
 
-		err = dbase.ScanHelpdesk(rows, &hd)
+		err = dbase.ScanHelpDesk(rows, &hd)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
@@ -1248,12 +1248,11 @@ func helpdeskGet(w http.ResponseWriter, r *http.Request) {
 		defer rows.Close()
 
 		for rows.Next() {
-			err = dbase.ScanHelpdesk(rows, &hd)
+			err = dbase.ScanHelpDesk(rows, &hd)
 			if err != nil {
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 				return
 			}
-
 			hds = append(hds, hd)
 		}
 
@@ -1273,4 +1272,206 @@ func helpdeskGet(w http.ResponseWriter, r *http.Request) {
 	}
 
 	http.Error(w, "bad params", http.StatusBadRequest)
+}
+
+func payDeskHandler(w http.ResponseWriter, r *http.Request) {
+
+	if r.Method == http.MethodPost {
+		payDeskPost(w, r)
+	} else if r.Method == http.MethodGet {
+		payDeskGet(w, r)
+	}
+
+}
+
+func payDeskPost(w http.ResponseWriter, r *http.Request) {
+	var err error
+	var pd models.PayDesk
+
+	fvFrom := r.FormValue("from")
+
+	// перевіримо чи параметр from відповідає одному з двох дозволених значень
+	if fvFrom == Mobile {
+		pd.IsModifiedMob = true
+	} else if fvFrom == Accounting {
+		pd.IsModifiedAcc = true
+	} else {
+		http.Error(w, "wrong \"from\" param", http.StatusBadRequest)
+		return
+	}
+
+	// зчитуємо тіло запиту
+	bs, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	// конвертуэмо масив байтів в об'єкт типу PayDesk
+	err = json.Unmarshal(bs, &pd)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	if pd.ID == 0 {
+		id, err := dbase.InsertPayDesk(db, pd)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		answer := map[string]int64{
+			"id": id}
+
+		bs, err := json.Marshal(answer)
+
+		_, err = w.Write(bs)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		w.WriteHeader(http.StatusOK)
+
+		return
+	} else {
+
+		if pd.IsModifiedMob {
+			_, err = dbase.UpdatePayDesk(db, pd)
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
+		} else {
+			var existPayDesk models.PayDesk
+
+			rows, err := dbase.SelectPayDeskByID(db, pd.ID)
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
+
+			err = dbase.ScanPayDesk(rows, &existPayDesk)
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
+
+			if existPayDesk.IsModifiedMob {
+				http.Error(w, "object already has been updated by mobile database", http.StatusBadRequest)
+				return
+			}
+
+			_, err = dbase.UpdatePayDesk(db, pd)
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
+
+			w.WriteHeader(http.StatusOK)
+			return
+		}
+	}
+}
+
+func payDeskGet(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	var pd models.PayDesk
+
+	fvID := r.FormValue("id")
+	fvFor := r.FormValue("for")
+
+	if fvID == "" && fvFor == "" {
+		http.Error(w, "incorrect params", http.StatusBadRequest)
+		return
+	}
+
+	if fvID != "" {
+
+		id, err := strconv.Atoi(fvID)
+		if err != nil {
+			http.Error(w, "wrong \"id\" param", http.StatusBadRequest)
+			return
+		}
+
+		rows, err := dbase.SelectPayDeskByID(db, id)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		if !rows.Next() {
+			http.Error(w, "cant find pay_desk by this id", http.StatusBadRequest)
+			return
+		}
+		defer rows.Close()
+
+		err = dbase.ScanPayDesk(rows, &pd)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		bs, err := json.Marshal(pd)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		_, err = w.Write(bs)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		w.WriteHeader(http.StatusOK)
+		return
+	} else if fvFor != "" {
+
+		var hds []models.PayDesk
+		var rows *sql.Rows
+
+		if fvFor == Mobile {
+			rows, err = dbase.SelectPayDeskModifiedByAcc(db)
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
+		} else if fvFor == Accounting {
+			rows, err = dbase.SelectPayDeskModifiedByMob(db)
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
+		} else {
+			http.Error(w, "incorrect \"for\" param", http.StatusBadRequest)
+		}
+		defer rows.Close()
+
+		for rows.Next() {
+			err = dbase.ScanPayDesk(rows, &pd)
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
+			hds = append(hds, pd)
+		}
+
+		bs, err := json.Marshal(hds)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		_, err = w.Write(bs)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		w.WriteHeader(http.StatusOK)
+		return
+	}
+
+	http.Error(w, "bad params", http.StatusBadRequest)
+
 }

@@ -105,3 +105,16 @@ type HelpDesk struct {
 	IsModifiedMob ConvertibleBoolean `json:"-"`
 	IsModifiedAcc ConvertibleBoolean `json:"-"`
 }
+
+type PayDesk struct {
+	ID             int                `json:"id"`
+	UserID         string             `json:"user_id"`
+	Amount         float32            `json:"amount"`
+	Payment        string             `json:"payment"`
+	DocumentNumber string             `json:"document_number"`
+	DocumentDate   NullTime           `json:"document_date"`
+	CreatedAt      NullTime           `json:"created_at"`
+	UpdatedAt      NullTime           `json:"updated_at"`
+	IsModifiedMob  ConvertibleBoolean `json:"-"`
+	IsModifiedAcc  ConvertibleBoolean `json:"-"`
+}

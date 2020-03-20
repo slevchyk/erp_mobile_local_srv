@@ -323,3 +323,60 @@ func SelectHelpDeskModifiedByAcc(db *sql.DB) (*sql.Rows, error) {
 		WHERE
 			hd.is_modified_acc=true`)
 }
+
+func SelectPayDeskByID(db *sql.DB, id int) (*sql.Rows, error) {
+	return db.Query(`
+		SELECT
+			pd.id,
+		    pd.user_id,
+		    pd.amount,
+		    pd.payment,
+		    pd.document_number,
+		    pd.document_date,
+		    pd.created_at,
+		    pd.updated_at,		    
+		    pd.is_modified_mob,
+		    pd.is_modified_acc		       
+		FROM 
+			pay_desk pd
+		WHERE
+			pd.id=$1`, id)
+}
+
+func SelectPayDeskModifiedByMob(db *sql.DB) (*sql.Rows, error) {
+	return db.Query(`
+		SELECT
+			pd.id,
+		    pd.user_id,
+		    pd.amount,
+		    pd.payment,
+		    pd.document_number,
+		    pd.document_date,
+		    pd.created_at,
+		    pd.updated_at,		    
+		    pd.is_modified_mob,
+		    pd.is_modified_acc		       
+		FROM 
+			pay_desk pd
+		WHERE
+			pd.is_modified_mob=true`)
+}
+
+func SelectPayDeskModifiedByAcc(db *sql.DB) (*sql.Rows, error) {
+	return db.Query(`
+		SELECT
+			pd.id,
+		    pd.user_id,
+		    pd.amount,
+		    pd.payment,
+		    pd.document_number,
+		    pd.document_date,
+		    pd.created_at,
+		    pd.updated_at,		    
+		    pd.is_modified_mob,
+		    pd.is_modified_acc		       
+		FROM 
+			pay_desk pd
+		WHERE
+			pd.is_modified_acc=true`)
+}

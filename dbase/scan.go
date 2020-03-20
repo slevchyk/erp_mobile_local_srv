@@ -76,7 +76,7 @@ func ScanProfile(rows *sql.Rows, p *models.Profile) error {
 		&p.PhotoData)
 }
 
-func ScanHelpdesk(rows *sql.Rows, hd *models.HelpDesk) error {
+func ScanHelpDesk(rows *sql.Rows, hd *models.HelpDesk) error {
 	return rows.Scan(
 		&hd.ID,
 		&hd.UserID,
@@ -89,5 +89,20 @@ func ScanHelpdesk(rows *sql.Rows, hd *models.HelpDesk) error {
 		&hd.AnsweredAt,
 		&hd.IsModifiedMob,
 		&hd.IsModifiedAcc,
+	)
+}
+
+func ScanPayDesk(rows *sql.Rows, pd *models.PayDesk) error {
+	return rows.Scan(
+		&pd.ID,
+		&pd.UserID,
+		&pd.Amount,
+		&pd.Payment,
+		&pd.DocumentNumber,
+		&pd.DocumentDate,
+		&pd.CreatedAt,
+		&pd.UpdatedAt,
+		&pd.IsModifiedMob,
+		&pd.IsModifiedAcc,
 	)
 }

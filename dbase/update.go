@@ -215,3 +215,40 @@ func UpdateHelpDesk(db *sql.DB, hd models.HelpDesk) (sql.Result, error) {
 		hd.ID)
 	return res, err
 }
+
+func UpdatePayDesk(db *sql.DB, pd models.PayDesk) (sql.Result, error) {
+
+	var err error
+
+	stmt, err := db.Prepare(`
+			UPDATE
+				pay_desk
+			SET
+				user_id = $1,
+				amount = $2,
+				payment = $3,
+				document_number = $4,
+				document_date = $5,
+				created_at = $6,
+				updated_at = $7,				
+				is_modified_mob = $8,
+				is_modified_acc = $9				
+			WHERE
+				id=$10
+			`)
+	if err != nil {
+		return nil, err
+	}
+	res, err := stmt.Exec(
+		pd.UserID,
+		pd.Amount,
+		pd.Payment,
+		pd.DocumentNumber,
+		pd.DocumentDate,
+		pd.CreatedAt,
+		pd.UpdatedAt,
+		pd.IsModifiedMob,
+		pd.IsModifiedAcc,
+		pd.ID)
+	return res, err
+}
