@@ -126,6 +126,7 @@ func webApp() {
 	http.HandleFunc("/api/profile", basicAuth(profileHandler))
 	http.HandleFunc("/api/helpdesk", basicAuth(helpDeskHandler))
 	http.HandleFunc("/api/paydesk", basicAuth(payDeskHandler))
+	http.HandleFunc("/api/paydesk/processed", basicAuth(payDeskProcessedHandler))
 	http.HandleFunc("/test", testHandler)
 
 	err := http.ListenAndServe(":8822", nil)
@@ -653,7 +654,7 @@ func timingPost(w http.ResponseWriter, r *http.Request) {
 
 	// перевіримо чи параметр from відповідає одному з двох дозволених значень
 	if fvFrom != Mobile && fvFrom != Accounting {
-		http.Error(w, "wrong \"from\" param", http.StatusBadRequest)
+		http.Error(w, "incorrect \"from\" param", http.StatusBadRequest)
 		return
 	}
 
@@ -831,7 +832,7 @@ func timingGet(w http.ResponseWriter, r *http.Request) {
 			var date time.Time
 			date, err := time.Parse("20060102", fvDate)
 			if err != nil {
-				errMessage += fmt.Sprintf("wrong \"date\" param format\n")
+				errMessage += fmt.Sprintf("incorrect \"date\" param format\n")
 			}
 
 			if fvUserID == "" {
@@ -872,7 +873,7 @@ func timingGet(w http.ResponseWriter, r *http.Request) {
 			var date time.Time
 			date, err := time.Parse("2006-01-02T03:04:05", fvDate)
 			if err != nil {
-				errMessage += fmt.Sprintf("wrong \"date\" param format\n")
+				errMessage += fmt.Sprintf("incorrect \"date\" param format\n")
 			}
 
 			if errMessage != "" {
@@ -897,7 +898,7 @@ func timingGet(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 	default:
-		http.Error(w, "wrong \"type\" param", http.StatusBadRequest)
+		http.Error(w, "incorrect \"type\" param", http.StatusBadRequest)
 		return
 	}
 
@@ -1095,7 +1096,7 @@ func helpDeskPost(w http.ResponseWriter, r *http.Request) {
 	} else if fvFrom == Accounting {
 		hd.IsModifiedAcc = true
 	} else {
-		http.Error(w, "wrong \"from\" param", http.StatusBadRequest)
+		http.Error(w, "incorrect \"from\" param", http.StatusBadRequest)
 		return
 	}
 
@@ -1190,7 +1191,7 @@ func helpDeskGet(w http.ResponseWriter, r *http.Request) {
 
 		id, err := strconv.Atoi(fvID)
 		if err != nil {
-			http.Error(w, "wrong \"id\" param", http.StatusBadRequest)
+			http.Error(w, "incorrect \"id\" param", http.StatusBadRequest)
 			return
 		}
 
@@ -1296,7 +1297,7 @@ func payDeskPost(w http.ResponseWriter, r *http.Request) {
 	} else if fvFrom == Accounting {
 		pd.IsModifiedAcc = true
 	} else {
-		http.Error(w, "wrong \"from\" param", http.StatusBadRequest)
+		http.Error(w, "incorrect \"from\" param", http.StatusBadRequest)
 		return
 	}
 
@@ -1391,7 +1392,7 @@ func payDeskGet(w http.ResponseWriter, r *http.Request) {
 
 		id, err := strconv.Atoi(fvID)
 		if err != nil {
-			http.Error(w, "wrong \"id\" param", http.StatusBadRequest)
+			http.Error(w, "incorrect \"id\" param", http.StatusBadRequest)
 			return
 		}
 
@@ -1474,4 +1475,63 @@ func payDeskGet(w http.ResponseWriter, r *http.Request) {
 
 	http.Error(w, "bad params", http.StatusBadRequest)
 
+}
+
+func payDeskProcessedHandler(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	var pd models.PayDesk
+
+	fvFrom := r.FormValue("from")
+	fvID := r.FormValue("id")
+
+	// перевіримо чи параметр from відповідає одному з двох дозволених значень
+	if fvFrom == Mobile {
+		pd.IsModifiedMob = true
+	} else if fvFrom == Accounting {
+		pd.IsModifiedAcc = true
+	} else {
+		http.Error(w, "incorrect \"from\" param", http.StatusBadRequest)
+		return
+	}
+
+	if fvID == "" {
+		http.Error(w, "incorrect \"id\" param", http.StatusBadRequest)
+		return
+	}
+
+	id, err := strconv.Atoi(fvID)
+	if err != nil {
+		http.Error(w, "non integer \"id\" param", http.StatusBadRequest)
+		return
+	}
+
+	rows, err := dbase.SelectPayDeskByID(db, id)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	if rows.Next() {
+		var pd models.PayDesk
+		err = dbase.ScanPayDesk(rows, &pd)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		if fvFrom == Mobile {
+			pd.IsModifiedAcc = false
+		} else if fvFrom == Accounting {
+			pd.IsModifiedMob = false
+		}
+
+		_, err = dbase.UpdatePayDesk(db, pd)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+	}
+
+	w.WriteHeader(http.StatusOK)
 }
