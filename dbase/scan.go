@@ -72,7 +72,7 @@ func ScanProfile(rows *sql.Rows, p *models.Profile) error {
 		&p.Languages,
 		&p.Disability,
 		&p.Pensioner,
-		&p.Photo,
+		&p.PhotoName,
 		&p.PhotoData)
 }
 
@@ -87,8 +87,8 @@ func ScanHelpDesk(rows *sql.Rows, hd *models.HelpDesk) error {
 		&hd.Answer,
 		&hd.AnsweredBy,
 		&hd.AnsweredAt,
-		&hd.IsModifiedMob,
-		&hd.IsModifiedAcc,
+		&hd.IsModifiedByMob,
+		&hd.IsModifiedByAcc,
 	)
 }
 
@@ -100,9 +100,12 @@ func ScanPayDesk(rows *sql.Rows, pd *models.PayDesk) error {
 		&pd.Payment,
 		&pd.DocumentNumber,
 		&pd.DocumentDate,
+		&pd.FilePaths,
+		&pd.FilesQuantity,
 		&pd.CreatedAt,
 		&pd.UpdatedAt,
-		&pd.IsModifiedMob,
-		&pd.IsModifiedAcc,
+		&pd.IsDeleted,
+		&pd.IsModifiedByMob,
+		&pd.IsModifiedByAcc,
 	)
 }

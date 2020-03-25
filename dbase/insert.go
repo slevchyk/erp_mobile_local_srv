@@ -106,7 +106,7 @@ func InsertProfile(db *sql.DB, p models.Profile) (int64, error) {
 				languages,
 				disability,
 				pensioner,
-				photo,
+				photo_name,
 				photo_data
 			)
 		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27, $28, $29, $30, $31, $32) RETURNING id`,
@@ -140,7 +140,7 @@ func InsertProfile(db *sql.DB, p models.Profile) (int64, error) {
 		p.Languages,
 		p.Disability,
 		p.Pensioner,
-		p.Photo,
+		p.PhotoName,
 		p.PhotoData).
 		Scan(&lastInsertId)
 
@@ -161,8 +161,8 @@ func InsertHelpDesk(db *sql.DB, hd models.HelpDesk) (int64, error) {
 			    answer,
 			    answered_by,
 			    answered_at,
-			    is_modified_mob,
-			    is_modified_acc
+			    is_modified_by_mob,
+			    is_modified_by_acc
 			)
 		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING id`,
 		hd.UserID,
@@ -173,8 +173,8 @@ func InsertHelpDesk(db *sql.DB, hd models.HelpDesk) (int64, error) {
 		hd.Answer,
 		hd.AnsweredBy,
 		hd.AnsweredAt,
-		hd.IsModifiedMob,
-		hd.IsModifiedAcc).
+		hd.IsModifiedByMob,
+		hd.IsModifiedByAcc).
 		Scan(&lastInsertId)
 
 	return lastInsertId, err
@@ -190,22 +190,28 @@ func InsertPayDesk(db *sql.DB, pd models.PayDesk) (int64, error) {
 				amount,
 			    payment,
 			    document_number,
-			    document_date,
+				document_date,
+				file_paths,
+				files_quantity,
 			    created_at,
-			    updated_at,			    
-			    is_modified_mob,
-			    is_modified_acc
+				updated_at,
+				is_deleted,			    
+			    is_modified_by_mob,
+			    is_modified_by_acc
 			)
-		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING id`,
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) RETURNING id`,
 		pd.UserID,
 		pd.Amount,
 		pd.Payment,
 		pd.DocumentNumber,
 		pd.DocumentDate,
+		pd.FilePaths,
+		pd.FilesQuantity,
 		pd.CreatedAt,
 		pd.UpdatedAt,
-		pd.IsModifiedMob,
-		pd.IsModifiedAcc).
+		pd.IsDeleted,
+		pd.IsModifiedByMob,
+		pd.IsModifiedByAcc).
 		Scan(&lastInsertId)
 
 	return lastInsertId, err

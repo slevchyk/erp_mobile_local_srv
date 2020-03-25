@@ -125,6 +125,7 @@ func webApp() {
 	http.HandleFunc("/api/timing", basicAuth(timingHandler))
 	http.HandleFunc("/api/profile", basicAuth(profileHandler))
 	http.HandleFunc("/api/helpdesk", basicAuth(helpDeskHandler))
+	http.HandleFunc("/api/helpdesk/processed", basicAuth(helpDeskProcessedHandler))
 	http.HandleFunc("/api/paydesk", basicAuth(payDeskHandler))
 	http.HandleFunc("/api/paydesk/processed", basicAuth(payDeskProcessedHandler))
 	http.HandleFunc("/test", testHandler)
@@ -1092,9 +1093,10 @@ func helpDeskPost(w http.ResponseWriter, r *http.Request) {
 
 	// перевіримо чи параметр from відповідає одному з двох дозволених значень
 	if fvFrom == Mobile {
-		hd.IsModifiedMob = true
+		hd.IsModifiedByMob = true
+		hd.IsModifiedByAcc = false
 	} else if fvFrom == Accounting {
-		hd.IsModifiedAcc = true
+		hd.IsModifiedByAcc = true
 	} else {
 		http.Error(w, "incorrect \"from\" param", http.StatusBadRequest)
 		return
@@ -1136,7 +1138,7 @@ func helpDeskPost(w http.ResponseWriter, r *http.Request) {
 		return
 	} else {
 
-		if hd.IsModifiedMob {
+		if hd.IsModifiedByMob {
 			_, err = dbase.UpdateHelpDesk(db, hd)
 			if err != nil {
 				http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -1151,13 +1153,18 @@ func helpDeskPost(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 
+			if !rows.Next() {
+				http.Error(w, "no such helpdesk", http.StatusBadRequest)
+				return
+			}
+
 			err = dbase.ScanHelpDesk(rows, &existHelpDesk)
 			if err != nil {
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 				return
 			}
 
-			if existHelpDesk.IsModifiedMob {
+			if existHelpDesk.IsModifiedByMob {
 				http.Error(w, "object already has been updated by mobile database", http.StatusBadRequest)
 				return
 			}
@@ -1232,7 +1239,14 @@ func helpDeskGet(w http.ResponseWriter, r *http.Request) {
 		var rows *sql.Rows
 
 		if fvFor == Mobile {
-			rows, err = dbase.SelectHelpDeskModifiedByAcc(db)
+
+			fvUserID := r.FormValue("userid")
+			if fvUserID == "" {
+				http.Error(w, "incorrect \"userid\" param", http.StatusBadRequest)
+				return
+			}
+
+			rows, err = dbase.SelectHelpDeskModifiedByAcc(db, fvUserID)
 			if err != nil {
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 				return
@@ -1275,6 +1289,56 @@ func helpDeskGet(w http.ResponseWriter, r *http.Request) {
 	http.Error(w, "bad params", http.StatusBadRequest)
 }
 
+func helpDeskProcessedHandler(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	var hd models.HelpDesk
+
+	fvFrom := r.FormValue("from")
+	fvID := r.FormValue("id")
+
+	// перевіримо чи параметр from відповідає одному з двох дозволених значень
+	if fvFrom == Mobile {
+		hd.IsModifiedByAcc = false
+	} else if fvFrom == Accounting {
+		hd.IsModifiedByMob = false
+	} else {
+		http.Error(w, "incorrect \"from\" param", http.StatusBadRequest)
+		return
+	}
+
+	if fvID == "" {
+		http.Error(w, "incorrect \"id\" param", http.StatusBadRequest)
+		return
+	}
+
+	id, err := strconv.Atoi(fvID)
+	if err != nil {
+		http.Error(w, "non integer \"id\" param", http.StatusBadRequest)
+		return
+	}
+
+	rows, err := dbase.SelectHelpDeskByID(db, id)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	if rows.Next() {
+		err = dbase.ScanHelpDesk(rows, &hd)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		_, err = dbase.UpdateHelpDesk(db, hd)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+	}
+
+	w.WriteHeader(http.StatusOK)
+}
 func payDeskHandler(w http.ResponseWriter, r *http.Request) {
 
 	if r.Method == http.MethodPost {
@@ -1293,9 +1357,10 @@ func payDeskPost(w http.ResponseWriter, r *http.Request) {
 
 	// перевіримо чи параметр from відповідає одному з двох дозволених значень
 	if fvFrom == Mobile {
-		pd.IsModifiedMob = true
+		pd.IsModifiedByMob = true
+		pd.IsModifiedByAcc = false
 	} else if fvFrom == Accounting {
-		pd.IsModifiedAcc = true
+		pd.IsModifiedByAcc = true
 	} else {
 		http.Error(w, "incorrect \"from\" param", http.StatusBadRequest)
 		return
@@ -1337,12 +1402,15 @@ func payDeskPost(w http.ResponseWriter, r *http.Request) {
 		return
 	} else {
 
-		if pd.IsModifiedMob {
+		if pd.IsModifiedByMob {
 			_, err = dbase.UpdatePayDesk(db, pd)
 			if err != nil {
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 				return
 			}
+
+			w.WriteHeader(http.StatusOK)
+			return
 		} else {
 			var existPayDesk models.PayDesk
 
@@ -1352,18 +1420,31 @@ func payDeskPost(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 
+			if !rows.Next() {
+				http.Error(w, "no such paydesk", http.StatusBadRequest)
+				return
+			}
+
 			err = dbase.ScanPayDesk(rows, &existPayDesk)
 			if err != nil {
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 				return
 			}
 
-			if existPayDesk.IsModifiedMob {
-				http.Error(w, "object already has been updated by mobile database", http.StatusBadRequest)
+			if existPayDesk.IsModifiedByMob {
+				http.Error(w, "object already has been updated by mobile database", http.StatusNoContent)
 				return
 			}
 
-			_, err = dbase.UpdatePayDesk(db, pd)
+			existPayDesk.IsDeleted = pd.IsDeleted
+			existPayDesk.Amount = pd.Amount
+			existPayDesk.Payment = pd.Payment
+			existPayDesk.DocumentDate = pd.DocumentDate
+			existPayDesk.DocumentNumber = pd.DocumentNumber
+			existPayDesk.IsModifiedByMob = pd.IsModifiedByMob
+			existPayDesk.IsModifiedByAcc = pd.IsModifiedByAcc
+
+			_, err = dbase.UpdatePayDesk(db, existPayDesk)
 			if err != nil {
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 				return
@@ -1433,7 +1514,14 @@ func payDeskGet(w http.ResponseWriter, r *http.Request) {
 		var rows *sql.Rows
 
 		if fvFor == Mobile {
-			rows, err = dbase.SelectPayDeskModifiedByAcc(db)
+
+			fvUserID := r.FormValue("userid")
+			if fvUserID == "" {
+				http.Error(w, "incorrect \"userid\" param", http.StatusBadRequest)
+				return
+			}
+
+			rows, err = dbase.SelectPayDeskModifiedByAcc(db, fvUserID)
 			if err != nil {
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 				return
@@ -1486,11 +1574,7 @@ func payDeskProcessedHandler(w http.ResponseWriter, r *http.Request) {
 	fvID := r.FormValue("id")
 
 	// перевіримо чи параметр from відповідає одному з двох дозволених значень
-	if fvFrom == Mobile {
-		pd.IsModifiedMob = true
-	} else if fvFrom == Accounting {
-		pd.IsModifiedAcc = true
-	} else {
+	if fvFrom != Mobile && fvFrom != Accounting {
 		http.Error(w, "incorrect \"from\" param", http.StatusBadRequest)
 		return
 	}
@@ -1513,7 +1597,6 @@ func payDeskProcessedHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if rows.Next() {
-		var pd models.PayDesk
 		err = dbase.ScanPayDesk(rows, &pd)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -1521,9 +1604,9 @@ func payDeskProcessedHandler(w http.ResponseWriter, r *http.Request) {
 		}
 
 		if fvFrom == Mobile {
-			pd.IsModifiedAcc = false
+			pd.IsModifiedByAcc = false
 		} else if fvFrom == Accounting {
-			pd.IsModifiedMob = false
+			pd.IsModifiedByMob = false
 		}
 
 		_, err = dbase.UpdatePayDesk(db, pd)

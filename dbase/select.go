@@ -210,7 +210,7 @@ func SelectProfileByPhonePin(db *sql.DB, phone, pin string) (*sql.Rows, error) {
 			p.languages,
 			p.disability,
 			p.pensioner,
-			p.photo,
+			p.photo_name,
 			p.photo_data
 		FROM
 			profiles p
@@ -256,7 +256,7 @@ func SelectProfileByUserID(db *sql.DB, userID string) (*sql.Rows, error) {
 			p.languages,
 			p.disability,
 			p.pensioner,
-			p.photo,
+			p.photo_name,
 			p.photo_data
 		FROM
 			profiles p
@@ -276,8 +276,8 @@ func SelectHelpDeskByID(db *sql.DB, id int) (*sql.Rows, error) {
 		    hd.answer,
 		    hd.answered_by,
 		    hd.answered_at,
-		    hd.is_modified_mob,
-		    hd.is_modified_acc		       
+		    hd.is_modified_by_mob,
+		    hd.is_modified_by_acc		       
 		FROM 
 			help_desk hd
 		WHERE
@@ -296,15 +296,15 @@ func SelectHelpDeskModifiedByMob(db *sql.DB) (*sql.Rows, error) {
 		    hd.answer,
 		    hd.answered_by,
 		    hd.answered_at,
-		    hd.is_modified_mob,
-		    hd.is_modified_acc		       
+		    hd.is_modified_by_mob,
+		    hd.is_modified_by_acc		       
 		FROM 
 			help_desk hd
 		WHERE
-			hd.is_modified_mob=true`)
+			hd.is_modified_by_mob=true`)
 }
 
-func SelectHelpDeskModifiedByAcc(db *sql.DB) (*sql.Rows, error) {
+func SelectHelpDeskModifiedByAcc(db *sql.DB, userID string) (*sql.Rows, error) {
 	return db.Query(`
 		SELECT
 			hd.id,
@@ -316,12 +316,13 @@ func SelectHelpDeskModifiedByAcc(db *sql.DB) (*sql.Rows, error) {
 		    hd.answer,
 		    hd.answered_by,
 		    hd.answered_at,
-		    hd.is_modified_mob,
-		    hd.is_modified_acc		       
+		    hd.is_modified_by_mob,
+		    hd.is_modified_by_acc		       
 		FROM 
 			help_desk hd
 		WHERE
-			hd.is_modified_acc=true`)
+			hd.is_modified_by_acc=true
+			AND pd.user_id = $1`, userID)
 }
 
 func SelectPayDeskByID(db *sql.DB, id int) (*sql.Rows, error) {
@@ -332,11 +333,14 @@ func SelectPayDeskByID(db *sql.DB, id int) (*sql.Rows, error) {
 		    pd.amount,
 		    pd.payment,
 		    pd.document_number,
-		    pd.document_date,
+			pd.document_date,
+			pd.file_paths,
+			pd.files_quantity,
 		    pd.created_at,
-		    pd.updated_at,		    
-		    pd.is_modified_mob,
-		    pd.is_modified_acc		       
+			pd.updated_at,	
+			is_deleted,			    		    	    
+		    pd.is_modified_by_mob,
+		    pd.is_modified_by_acc		       
 		FROM 
 			pay_desk pd
 		WHERE
@@ -351,18 +355,21 @@ func SelectPayDeskModifiedByMob(db *sql.DB) (*sql.Rows, error) {
 		    pd.amount,
 		    pd.payment,
 		    pd.document_number,
-		    pd.document_date,
+			pd.document_date,
+			pd.file_paths,
+			pd.files_quantity,
 		    pd.created_at,
-		    pd.updated_at,		    
-		    pd.is_modified_mob,
-		    pd.is_modified_acc		       
+			pd.updated_at,
+			is_deleted,			    		    		    
+		    pd.is_modified_by_mob,
+		    pd.is_modified_by_acc		       
 		FROM 
 			pay_desk pd
 		WHERE
-			pd.is_modified_mob=true`)
+			pd.is_modified_by_mob=true`)
 }
 
-func SelectPayDeskModifiedByAcc(db *sql.DB) (*sql.Rows, error) {
+func SelectPayDeskModifiedByAcc(db *sql.DB, userID string) (*sql.Rows, error) {
 	return db.Query(`
 		SELECT
 			pd.id,
@@ -370,13 +377,17 @@ func SelectPayDeskModifiedByAcc(db *sql.DB) (*sql.Rows, error) {
 		    pd.amount,
 		    pd.payment,
 		    pd.document_number,
-		    pd.document_date,
+			pd.document_date,
+			pd.file_paths,
+			pd.files_quantity,
 		    pd.created_at,
-		    pd.updated_at,		    
-		    pd.is_modified_mob,
-		    pd.is_modified_acc		       
+			pd.updated_at,
+			is_deleted,			    		    
+		    pd.is_modified_by_mob,
+		    pd.is_modified_by_acc		       
 		FROM 
 			pay_desk pd
 		WHERE
-			pd.is_modified_acc=true`)
+			pd.is_modified_by_acc=true
+			AND pd.user_id = $1`, userID)
 }

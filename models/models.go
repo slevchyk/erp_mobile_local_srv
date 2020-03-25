@@ -88,33 +88,36 @@ type Profile struct {
 	Languages           string             `json:"languages"`
 	Disability          ConvertibleBoolean `json:"disability"`
 	Pensioner           ConvertibleBoolean `json:"pensioner"`
-	Photo               string             `json:"photo"`
+	PhotoName           string             `json:"photo_name"`
 	PhotoData           string             `json:"photo_data"`
 }
 
 type HelpDesk struct {
-	ID            int                `json:"id"`
-	UserID        string             `json:"user_id"`
-	Date          NullTime           `json:"date"`
-	Title         string             `json:"title"`
-	Body          string             `json:"body"`
-	Status        string             `json:"status"`
-	Answer        string             `json:"answer"`
-	AnsweredBy    string             `json:"answered_by"`
-	AnsweredAt    NullTime           `json:"answered_at"`
-	IsModifiedMob ConvertibleBoolean `json:"-"`
-	IsModifiedAcc ConvertibleBoolean `json:"-"`
+	ID              int                `json:"id"`
+	UserID          string             `json:"user_id"`
+	Date            NullTime           `json:"date"`
+	Title           string             `json:"title"`
+	Body            string             `json:"body"`
+	Status          string             `json:"status"`
+	Answer          string             `json:"answer"`
+	AnsweredBy      string             `json:"answered_by"`
+	AnsweredAt      NullTime           `json:"answered_at"`
+	IsModifiedByMob ConvertibleBoolean `json:"-"`
+	IsModifiedByAcc ConvertibleBoolean `json:"-"`
 }
 
 type PayDesk struct {
-	ID             int                `json:"id"`
-	UserID         string             `json:"user_id"`
-	Amount         float32            `json:"amount"`
-	Payment        string             `json:"payment"`
-	DocumentNumber string             `json:"document_number"`
-	DocumentDate   NullTime           `json:"document_date"`
-	CreatedAt      NullTime           `json:"created_at"`
-	UpdatedAt      NullTime           `json:"updated_at"`
-	IsModifiedMob  ConvertibleBoolean `json:"-"`
-	IsModifiedAcc  ConvertibleBoolean `json:"-"`
+	ID              int                `json:"id"`
+	UserID          string             `json:"user_id"`
+	Amount          float32            `json:"amount"`
+	Payment         string             `json:"payment"`
+	DocumentNumber  string             `json:"document_number"`
+	DocumentDate    NullTime           `json:"document_date"`
+	FilePaths       string             `json:"file_paths"`
+	FilesQuantity   int                `json:"files_quantity"`
+	CreatedAt       NullTime           `json:"created_at"`
+	UpdatedAt       NullTime           `json:"updated_at"`
+	IsDeleted       ConvertibleBoolean `json:"is_deleted"`
+	IsModifiedByMob ConvertibleBoolean `json:"-"`
+	IsModifiedByAcc ConvertibleBoolean `json:"-"`
 }

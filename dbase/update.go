@@ -131,7 +131,7 @@ func UpdateProfile(db *sql.DB, p models.Profile) (sql.Result, error) {
 				languages = $28,
 				disability = $29,
 				pensioner = $30,
-				photo = $31,
+				photo_name = $31,
 				photo_data = $32			
 			WHERE
 				id=$33
@@ -170,7 +170,7 @@ func UpdateProfile(db *sql.DB, p models.Profile) (sql.Result, error) {
 		p.Languages,
 		p.Disability,
 		p.Pensioner,
-		p.Photo,
+		p.PhotoName,
 		p.PhotoData,
 		p.ID)
 
@@ -193,8 +193,8 @@ func UpdateHelpDesk(db *sql.DB, hd models.HelpDesk) (sql.Result, error) {
 				answer = $6,
 				answered_by = $7,
 				answered_at = $8,
-				is_modified_mob = $9,
-				is_modified_acc = $10				
+				is_modified_by_mob = $9,
+				is_modified_by_acc = $10				
 			WHERE
 				id=$11
 			`)
@@ -210,8 +210,8 @@ func UpdateHelpDesk(db *sql.DB, hd models.HelpDesk) (sql.Result, error) {
 		hd.Answer,
 		hd.AnsweredBy,
 		hd.AnsweredAt,
-		hd.IsModifiedMob,
-		hd.IsModifiedAcc,
+		hd.IsModifiedByMob,
+		hd.IsModifiedByAcc,
 		hd.ID)
 	return res, err
 }
@@ -229,12 +229,15 @@ func UpdatePayDesk(db *sql.DB, pd models.PayDesk) (sql.Result, error) {
 				payment = $3,
 				document_number = $4,
 				document_date = $5,
-				created_at = $6,
-				updated_at = $7,				
-				is_modified_mob = $8,
-				is_modified_acc = $9				
+				file_paths = $6,
+				files_quantity = $7,
+				created_at = $8,
+				updated_at = $9,
+				is_deleted =$10,			    				
+				is_modified_by_mob = $11,
+				is_modified_by_acc = $12			
 			WHERE
-				id=$10
+				id=$13
 			`)
 	if err != nil {
 		return nil, err
@@ -245,10 +248,13 @@ func UpdatePayDesk(db *sql.DB, pd models.PayDesk) (sql.Result, error) {
 		pd.Payment,
 		pd.DocumentNumber,
 		pd.DocumentDate,
+		pd.FilePaths,
+		pd.FilesQuantity,
 		pd.CreatedAt,
 		pd.UpdatedAt,
-		pd.IsModifiedMob,
-		pd.IsModifiedAcc,
+		pd.IsDeleted,
+		pd.IsModifiedByMob,
+		pd.IsModifiedByAcc,
 		pd.ID)
 	return res, err
 }

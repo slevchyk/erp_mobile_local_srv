@@ -97,7 +97,7 @@ func InitDB(db *sql.DB) {
 			languages TEXT DEFAULT '',
 			disability BOOLEAN DEFAULT false,
 			pensioner BOOLEAN DEFAULT false,
-			photo TEXT DEFAULT '',
+			photo_name TEXT DEFAULT '',
 			photo_data TEXT DEFAULT '');
 			`)
 	if err != nil {
@@ -115,8 +115,8 @@ func InitDB(db *sql.DB) {
 			answer TEXT,
 			answered_by TEXT,
 			answered_at TIMESTAMP,
-			is_modified_mob BOOLEAN,
-			is_modified_acc BOOLEAN);
+			is_modified_by_mob BOOLEAN,
+			is_modified_by_acc BOOLEAN);
 			`)
 	if err != nil {
 		log.Fatal(err)
@@ -130,10 +130,13 @@ func InitDB(db *sql.DB) {
 			payment TEXT,
 			document_number TEXT,
 			document_date TIMESTAMP,
+			file_paths TEXT DEFAULT '', 
+			files_quantity INTEGER DEFAULT 0,
 			created_at TIMESTAMP,
 			updated_at TIMESTAMP,			
-			is_modified_mob BOOLEAN,
-			is_modified_acc BOOLEAN);
+			is_deleted BOOLEAN DEFAULT false,
+			is_modified_by_mob BOOLEAN,
+			is_modified_by_acc BOOLEAN);
 			`)
 	if err != nil {
 		log.Fatal(err)
