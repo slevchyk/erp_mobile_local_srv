@@ -322,7 +322,7 @@ func SelectHelpDeskModifiedByAcc(db *sql.DB, userID string) (*sql.Rows, error) {
 			help_desk hd
 		WHERE
 			hd.is_modified_by_acc=true
-			AND pd.user_id = $1`, userID)
+			AND hd.user_id = $1`, userID)
 }
 
 func SelectPayDeskByID(db *sql.DB, id int) (*sql.Rows, error) {
