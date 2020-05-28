@@ -456,7 +456,6 @@ func channelPost(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			continue
 		}
-		defer rows.Close()
 
 		if rows.Next() {
 			_, err = dbase.UpdateChannel(db, c)
@@ -471,6 +470,7 @@ func channelPost(w http.ResponseWriter, r *http.Request) {
 				continue
 			}
 		}
+		rows.Close()
 
 		if c.UserID != "" {
 
@@ -478,17 +478,20 @@ func channelPost(w http.ResponseWriter, r *http.Request) {
 			if err != nil {
 				continue
 			}
-			defer rows.Close()
 
 			if !rows.Next() {
+				rows.Close()
 				continue
 			}
 
 			var ft models.FirebaseTokens
 			err = dbase.ScanFirebaseToken(rows, &ft)
 			if err != nil {
+				rows.Close()
 				continue
 			}
+
+			rows.Close()
 
 			sendChannelNotification(c, ft.Token)
 		} else {
@@ -558,7 +561,6 @@ func channelGet(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	defer rows.Close()
 
 	for rows.Next() {
 		err = dbase.ScanChannel(rows, &c)
@@ -569,6 +571,7 @@ func channelGet(w http.ResponseWriter, r *http.Request) {
 
 		cs = append(cs, c)
 	}
+	rows.Close()
 
 	result, err := json.Marshal(cs)
 	if err != nil {
@@ -603,9 +606,9 @@ func tokenHandler(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
-		defer rows.Close()
 
 		if rows.Next() {
+			rows.Close()
 			w.WriteHeader(http.StatusOK)
 			return
 		}
@@ -615,7 +618,6 @@ func tokenHandler(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
-		defer rows.Close()
 
 		if rows.Next() {
 			_, err = dbase.UpdateFirebaseTokens(db, ft)
@@ -630,9 +632,9 @@ func tokenHandler(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 		}
+		rows.Close()
 
 		w.WriteHeader(http.StatusOK)
-
 	}
 }
 
@@ -688,15 +690,16 @@ func timingPost(w http.ResponseWriter, r *http.Request) {
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 				return
 			}
-			defer rows.Close()
 
 			if !rows.Next() {
+				rows.Close()
 				http.Error(w, fmt.Sprintf("timing with id=%v not found\n", t.ID), http.StatusBadRequest)
 				return
 			}
 
 			var et models.Timing
 			err = dbase.ScanTiming(rows, &et)
+			rows.Close()
 			if err != nil {
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 				return
@@ -725,11 +728,11 @@ func timingPost(w http.ResponseWriter, r *http.Request) {
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 				return
 			}
-			defer rows.Close()
 
 			if rows.Next() {
 				var et models.Timing
 				err = dbase.ScanTiming(rows, &et)
+				rows.Close()
 				if err != nil {
 					http.Error(w, err.Error(), http.StatusInternalServerError)
 					return
@@ -753,24 +756,25 @@ func timingPost(w http.ResponseWriter, r *http.Request) {
 					t.DeletedAt = et.DeletedAt
 				}
 			} else {
+				rows.Close()
 				t.ID, err = dbase.InsertTiming(db, *t)
 				if err != nil {
+
 					http.Error(w, err.Error(), http.StatusInternalServerError)
 					return
 				}
 			}
-
 		} else if fvFrom == Accounting {
 			rows, err := dbase.SelectTimingByAccIdUerIdDate(db, t.AccID, t.UserID, t.Date.Time)
 			if err != nil {
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 				return
 			}
-			defer rows.Close()
 
 			if rows.Next() {
 				var et models.Timing
 				err = dbase.ScanTiming(rows, &et)
+				rows.Close()
 				if err != nil {
 					http.Error(w, err.Error(), http.StatusInternalServerError)
 					return
@@ -794,6 +798,7 @@ func timingPost(w http.ResponseWriter, r *http.Request) {
 					t.DeletedAt = et.DeletedAt
 				}
 			} else {
+				rows.Close()
 				t.ID, err = dbase.InsertTiming(db, *t)
 				if err != nil {
 					http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -854,7 +859,6 @@ func timingGet(w http.ResponseWriter, r *http.Request) {
 				http.Error(w, err.Error(), http.StatusBadRequest)
 				return
 			}
-			defer rows.Close()
 
 			for rows.Next() {
 				err = dbase.ScanTiming(rows, &t)
@@ -865,6 +869,7 @@ func timingGet(w http.ResponseWriter, r *http.Request) {
 
 				ts = append(ts, t)
 			}
+			rows.Close()
 		}
 	case "updatedat":
 		{
@@ -893,7 +898,6 @@ func timingGet(w http.ResponseWriter, r *http.Request) {
 				http.Error(w, err.Error(), http.StatusBadRequest)
 				return
 			}
-			defer rows.Close()
 
 			for rows.Next() {
 				err = dbase.ScanTiming(rows, &t)
@@ -904,6 +908,7 @@ func timingGet(w http.ResponseWriter, r *http.Request) {
 
 				ts = append(ts, t)
 			}
+			rows.Close()
 		}
 	default:
 		http.Error(w, "incorrect \"type\" param", http.StatusBadRequest)
@@ -961,14 +966,15 @@ func profileGet(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	defer rows.Close()
 
 	if !rows.Next() {
+		rows.Close()
 		http.Error(w, "can't find any profile by this phone and pin", http.StatusNotFound)
 		return
 	}
 
 	err = dbase.ScanProfile(rows, &p)
+	rows.Close()
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -1021,11 +1027,11 @@ func profilePost(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	defer rows.Close()
 
 	if rows.Next() {
 		var existProfile models.Profile
 		err := dbase.ScanProfile(rows, &existProfile)
+		rows.Close()
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
@@ -1038,8 +1044,10 @@ func profilePost(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	} else {
+		rows.Close()
 		_, err = dbase.InsertProfile(db, p)
 		if err != nil {
+			rows.Close()
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
@@ -1160,14 +1168,15 @@ func helpDeskPost(w http.ResponseWriter, r *http.Request) {
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 				return
 			}
-			defer rows.Close()
 
 			if !rows.Next() {
+				rows.Close()
 				http.Error(w, "no such helpdesk", http.StatusBadRequest)
 				return
 			}
 
 			err = dbase.ScanHelpDesk(rows, &existHelpDesk)
+			rows.Close()
 			if err != nil {
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 				return
@@ -1216,15 +1225,15 @@ func helpDeskGet(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
-		defer rows.Close()
 
 		if !rows.Next() {
+			rows.Close()
 			http.Error(w, "cant find help_desk by this id", http.StatusBadRequest)
 			return
 		}
-		defer rows.Close()
 
 		err = dbase.ScanHelpDesk(rows, &hd)
+		rows.Close()
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
@@ -1270,7 +1279,6 @@ func helpDeskGet(w http.ResponseWriter, r *http.Request) {
 		} else {
 			http.Error(w, "incorrect \"for\" param", http.StatusBadRequest)
 		}
-		defer rows.Close()
 
 		for rows.Next() {
 			err = dbase.ScanHelpDesk(rows, &hd)
@@ -1280,6 +1288,7 @@ func helpDeskGet(w http.ResponseWriter, r *http.Request) {
 			}
 			hds = append(hds, hd)
 		}
+		rows.Close()
 
 		bs, err := json.Marshal(hds)
 		if err != nil {
@@ -1333,7 +1342,6 @@ func helpDeskProcessedHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	defer rows.Close()
 
 	if rows.Next() {
 		err = dbase.ScanHelpDesk(rows, &hd)
@@ -1347,6 +1355,7 @@ func helpDeskProcessedHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
+	rows.Close()
 
 	w.WriteHeader(http.StatusOK)
 }
@@ -1430,14 +1439,15 @@ func payDeskPost(w http.ResponseWriter, r *http.Request) {
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 				return
 			}
-			defer rows.Close()
 
 			if !rows.Next() {
+				rows.Close()
 				http.Error(w, "no such paydesk", http.StatusBadRequest)
 				return
 			}
 
 			err = dbase.ScanPayDesk(rows, &existPayDesk)
+			rows.Close()
 			if err != nil {
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 				return
@@ -1494,15 +1504,15 @@ func payDeskGet(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
-		defer rows.Close()
 
 		if !rows.Next() {
+			rows.Close()
 			http.Error(w, "cant find pay_desk by this id", http.StatusBadRequest)
 			return
 		}
-		defer rows.Close()
 
 		err = dbase.ScanPayDesk(rows, &pd)
+		rows.Close()
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
@@ -1548,7 +1558,6 @@ func payDeskGet(w http.ResponseWriter, r *http.Request) {
 		} else {
 			http.Error(w, "incorrect \"for\" param", http.StatusBadRequest)
 		}
-		defer rows.Close()
 
 		for rows.Next() {
 			err = dbase.ScanPayDesk(rows, &pd)
@@ -1558,6 +1567,7 @@ func payDeskGet(w http.ResponseWriter, r *http.Request) {
 			}
 			hds = append(hds, pd)
 		}
+		rows.Close()
 
 		bs, err := json.Marshal(hds)
 		if err != nil {
@@ -1608,7 +1618,6 @@ func payDeskProcessedHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	defer rows.Close()
 
 	if rows.Next() {
 		err = dbase.ScanPayDesk(rows, &pd)
@@ -1629,6 +1638,7 @@ func payDeskProcessedHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
+	rows.Close()
 
 	w.WriteHeader(http.StatusOK)
 }
