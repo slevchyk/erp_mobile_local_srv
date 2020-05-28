@@ -170,9 +170,11 @@ func SelectTimingByUpdatedAt(db *sql.DB, date time.Time) (*sql.Rows, error) {
 			t.deleted_at					
 		FROM 
 			timing t
-		WHERE
-			t.updated_at>$1
-			OR t.updated_at IS NULL`, date)
+	 WHERE
+	 	t.updated_at IS NULL
+		 OR (t.updated_at IS NOT NULL
+			AND t.updated_at>$1)`, date)
+	// AND t.updated_at>$1)`, date.Format(time.RFC3339))
 }
 
 func SelectProfileByPhonePin(db *sql.DB, phone, pin string) (*sql.Rows, error) {
