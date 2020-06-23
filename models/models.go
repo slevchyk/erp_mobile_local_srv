@@ -121,3 +121,30 @@ type PayDesk struct {
 	IsModifiedByMob ConvertibleBoolean `json:"-"`
 	IsModifiedByAcc ConvertibleBoolean `json:"-"`
 }
+
+type CostItem struct {
+	ID        int                `json:"id"`
+	AccID     string             `json:"acc_id"`
+	Name      string             `json:"name"`
+	CreatedAt NullTime           `json:"created_at"`
+	UpdatedAt NullTime           `json:"updated_at"`
+	IsDeleted ConvertibleBoolean `json:"is_deleted"`
+}
+
+type IncomeItem struct {
+	ID        int                `json:"id"`
+	AccID     string             `json:"acc_id"`
+	Name      string             `json:"name"`
+	CreatedAt NullTime           `json:"created_at"`
+	UpdatedAt NullTime           `json:"updated_at"`
+	IsDeleted ConvertibleBoolean `json:"is_deleted"`
+}
+
+type PayOffice struct {
+	ID        int                `json:"id"`
+	AccID     string             `json:"acc_id"`
+	Name      string             `json:"name"`
+	CreatedAt NullTime           `json:"created_at"`
+	UpdatedAt NullTime           `json:"updated_at"`
+	IsDeleted ConvertibleBoolean `json:"is_deleted"`
+}

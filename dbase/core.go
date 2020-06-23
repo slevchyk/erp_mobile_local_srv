@@ -142,4 +142,43 @@ func InitDB(db *sql.DB) {
 		log.Fatal(err)
 	}
 
+	_, err = db.Exec(`
+		CREATE TABLE IF NOT EXISTS cost_items (
+			id SERIAL PRIMARY KEY,
+			acc_id TEXT,
+			name TEXT,
+			created_at TIMESTAMP,
+			updated_at TIMESTAMP,			
+			is_deleted BOOLEAN DEFAULT false);
+			`)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	_, err = db.Exec(`
+		CREATE TABLE IF NOT EXISTS income_items (
+			id SERIAL PRIMARY KEY,
+			acc_id TEXT,
+			name TEXT,
+			created_at TIMESTAMP,
+			updated_at TIMESTAMP,			
+			is_deleted BOOLEAN DEFAULT false);
+			`)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	_, err = db.Exec(`
+		CREATE TABLE IF NOT EXISTS pay_offices (
+			id SERIAL PRIMARY KEY,
+			acc_id TEXT,
+			name TEXT,
+			created_at TIMESTAMP,
+			updated_at TIMESTAMP,			
+			is_deleted BOOLEAN DEFAULT false);
+			`)
+	if err != nil {
+		log.Fatal(err)
+	}
+
 }

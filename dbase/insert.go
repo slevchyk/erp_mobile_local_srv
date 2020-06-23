@@ -216,3 +216,73 @@ func InsertPayDesk(db *sql.DB, pd models.PayDesk) (int64, error) {
 
 	return lastInsertId, err
 }
+
+func InsertCostItem(db *sql.DB, ci models.CostItem) (int64, error) {
+
+	var lastInsertId int64
+
+	err := db.QueryRow(`
+		INSERT INTO
+			cost_items (
+				acc_id,
+				name,			    
+			    created_at,
+				updated_at,
+				is_deleted
+			)
+		VALUES ($1, $2, $3, $4, $5) RETURNING id`,
+		ci.AccID,
+		ci.Name,
+		ci.CreatedAt,
+		ci.UpdatedAt,
+		ci.IsDeleted).
+		Scan(&lastInsertId)
+
+	return lastInsertId, err
+}
+
+func InsertIncomeItem(db *sql.DB, ii models.IncomeItem) (int64, error) {
+	var lastInsertId int64
+
+	err := db.QueryRow(`
+		INSERT INTO
+			income_items (
+				acc_id,
+				name,			    
+			    created_at,
+				updated_at,
+				is_deleted
+			)
+		VALUES ($1, $2, $3, $4, $5) RETURNING id`,
+		ii.AccID,
+		ii.Name,
+		ii.CreatedAt,
+		ii.UpdatedAt,
+		ii.IsDeleted).
+		Scan(&lastInsertId)
+
+	return lastInsertId, err
+}
+
+func InsertPayOffice(db *sql.DB, po models.PayOffice) (int64, error) {
+	var lastInsertId int64
+
+	err := db.QueryRow(`
+		INSERT INTO
+			pay_offices (
+				acc_id,
+				name,			    
+			    created_at,
+				updated_at,
+				is_deleted
+			)
+		VALUES ($1, $2, $3, $4, $5) RETURNING id`,
+		po.AccID,
+		po.Name,
+		po.CreatedAt,
+		po.UpdatedAt,
+		po.IsDeleted).
+		Scan(&lastInsertId)
+
+	return lastInsertId, err
+}

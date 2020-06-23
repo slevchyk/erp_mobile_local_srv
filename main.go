@@ -125,6 +125,8 @@ func webApp() {
 	http.HandleFunc("/api/helpdesk/processed", basicAuth(helpDeskProcessedHandler))
 	http.HandleFunc("/api/paydesk", basicAuth(payDeskHandler))
 	http.HandleFunc("/api/paydesk/processed", basicAuth(payDeskProcessedHandler))
+	http.HandleFunc("/api/costitems", basicAuth(costItemsHandler))
+
 	http.HandleFunc("/test", testHandler)
 
 	err := http.ListenAndServe(":8822", nil)
@@ -1638,4 +1640,111 @@ func payDeskProcessedHandler(w http.ResponseWriter, r *http.Request) {
 	rows.Close()
 
 	w.WriteHeader(http.StatusOK)
+}
+
+func costItemsHandler(w http.ResponseWriter, r *http.Request) {
+
+	if r.Method == http.MethodPost {
+		costItemsPost(w, r)
+	} else if r.Method == http.MethodGet {
+		costItemsGet(w, r)
+	}
+
+}
+
+func costItemsPost(w http.ResponseWriter, r *http.Request) {
+	var err error
+	var ci models.CostItem
+	var cis []models.CostItem
+
+	// зчитуємо тіло запиту
+	bs, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	// конвертуэмо масив байтів в об'єкт типу []CostItem
+	err = json.Unmarshal(bs, &cis)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	for _, v := range cis {
+
+		rows, err := dbase.SelectCostItemsByAccID(db, v.AccID)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		if rows.Next() {
+			err = dbase.ScanCostItem(rows, &ci)
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
+
+			v.ID = ci.ID
+			v.CreatedAt = ci.CreatedAt
+			v.UpdatedAt.Valid = true
+			v.UpdatedAt.Time = time.Now()
+
+			_, err = dbase.UpdateCostItem(db, v)
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
+		} else {
+			v.CreatedAt.Valid = true
+			v.CreatedAt.Time = time.Now()
+			_, err = dbase.InsertCostItem(db, v)
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
+		}
+		rows.Close()
+	}
+
+	w.WriteHeader(http.StatusOK)
+}
+
+func costItemsGet(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	var ci models.CostItem
+	var cis []models.CostItem
+
+	rows, err := dbase.SelectCostItems(db)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	for rows.Next() {
+		err = dbase.ScanCostItem(rows, &ci)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		cis = append(cis, ci)
+	}
+	rows.Close()
+
+	bs, err := json.Marshal(cis)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	_, err = w.Write(bs)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	w.WriteHeader(http.StatusOK)
+
 }

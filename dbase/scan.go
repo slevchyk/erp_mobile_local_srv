@@ -109,3 +109,36 @@ func ScanPayDesk(rows *sql.Rows, pd *models.PayDesk) error {
 		&pd.IsModifiedByAcc,
 	)
 }
+
+func ScanCostItem(rows *sql.Rows, ci *models.CostItem) error {
+	return rows.Scan(
+		&ci.ID,
+		&ci.AccID,
+		&ci.Name,
+		&ci.CreatedAt,
+		&ci.UpdatedAt,
+		&ci.IsDeleted,
+	)
+}
+
+func ScanIncomeItem(rows *sql.Rows, ii *models.IncomeItem) error {
+	return rows.Scan(
+		&ii.ID,
+		&ii.AccID,
+		&ii.Name,
+		&ii.CreatedAt,
+		&ii.UpdatedAt,
+		&ii.IsDeleted,
+	)
+}
+
+func ScanPayOffice(rows *sql.Rows, po *models.PayOffice) error {
+	return rows.Scan(
+		&po.ID,
+		&po.AccID,
+		&po.Name,
+		&po.CreatedAt,
+		&po.UpdatedAt,
+		&po.IsDeleted,
+	)
+}

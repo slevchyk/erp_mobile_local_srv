@@ -258,3 +258,32 @@ func UpdatePayDesk(db *sql.DB, pd models.PayDesk) (sql.Result, error) {
 		pd.ID)
 	return res, err
 }
+
+func UpdateCostItem(db *sql.DB, ci models.CostItem) (sql.Result, error) {
+
+	var err error
+
+	stmt, err := db.Prepare(`
+			UPDATE
+				cost_items
+			SET
+				acc_id = $1,
+				name = $2,				
+				created_at = $3,
+				updated_at = $4,
+				is_deleted =$5				
+			WHERE
+				id=$6
+			`)
+	if err != nil {
+		return nil, err
+	}
+	res, err := stmt.Exec(
+		ci.AccID,
+		ci.Name,
+		ci.CreatedAt,
+		ci.UpdatedAt,
+		ci.IsDeleted,
+		ci.ID)
+	return res, err
+}

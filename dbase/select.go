@@ -384,7 +384,7 @@ func SelectPayDeskModifiedByAcc(db *sql.DB, userID string) (*sql.Rows, error) {
 			pd.files_quantity,
 		    pd.created_at,
 			pd.updated_at,
-			is_deleted,			    		    
+			pd.is_deleted,			    		    
 		    pd.is_modified_by_mob,
 		    pd.is_modified_by_acc		       
 		FROM 
@@ -392,4 +392,97 @@ func SelectPayDeskModifiedByAcc(db *sql.DB, userID string) (*sql.Rows, error) {
 		WHERE
 			pd.is_modified_by_acc=true
 			AND pd.user_id = $1`, userID)
+}
+
+func SelectCostItems(db *sql.DB) (*sql.Rows, error) {
+	return db.Query(`
+		SELECT
+			ci.id,
+			ci.acc_id,
+			ci.name,		
+			ci.created_at,
+			ci.updated_at,
+			ci.is_deleted
+		FROM 
+			cost_items ci
+		WHERE
+			ci.is_deleted=false`)
+}
+
+func SelectCostItemsByAccID(db *sql.DB, accID string) (*sql.Rows, error) {
+	return db.Query(`
+		SELECT
+			ci.id,
+			ci.acc_id,
+			ci.name,		
+			ci.created_at,
+			ci.updated_at,
+			ci.is_deleted
+		FROM 
+			cost_items ci
+		WHERE
+			ci.is_deleted=false
+			AND ci.acc_id = $1`, accID)
+}
+
+func SelectIncomeItems(db *sql.DB) (*sql.Rows, error) {
+	return db.Query(`
+		SELECT
+			ii.id,
+			ii.acc_id,
+			ii.name,		
+			ii.created_at,
+			ii.updated_at,
+			ii.is_deleted
+		FROM 
+		income_items ii
+		WHERE
+			ii.is_deleted=false`)
+}
+
+func SelectIncomeItemsByAccID(db *sql.DB, accID string) (*sql.Rows, error) {
+	return db.Query(`
+		SELECT
+			ii.id,
+			ii.acc_id,
+			ii.name,		
+			ii.created_at,
+			ii.updated_at,
+			ii.is_deleted
+		FROM 
+			income_items ii
+		WHERE
+			ii.is_deleted=false
+			AND ii.acc_id = $1`, accID)
+}
+
+func SelectPayOffices(db *sql.DB) (*sql.Rows, error) {
+	return db.Query(`
+		SELECT
+			po.id,
+			po.acc_id,
+			po.name,		
+			po.created_at,
+			po.updated_at,
+			po.is_deleted
+		FROM 
+			pay_offices po
+		WHERE
+			po.is_deleted=false`)
+}
+
+func SelectPayOfficesByAccID(db *sql.DB, accID string) (*sql.Rows, error) {
+	return db.Query(`
+		SELECT
+			po.id,
+			po.acc_id,
+			po.name,		
+			po.created_at,
+			po.updated_at,
+			po.is_deleted
+		FROM 
+			pay_offices po
+		WHERE
+			po.is_deleted=false
+			AND po.acc_id = $1`, accID)
 }
