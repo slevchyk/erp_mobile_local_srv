@@ -36,13 +36,10 @@ var eLog debug.Log
 type myService struct{}
 
 const (
-	Mobile     = "mobile"
+	//Mobile is type of data source from mobile device
+	Mobile = "mobile"
+	//Accounting is type of data source from main DB
 	Accounting = "accounting"
-)
-
-const (
-	ErrorNil = iota
-	ErrorCantUpdate
 )
 
 func init() {
@@ -221,6 +218,7 @@ func removeService(name string) error {
 	}
 	return nil
 }
+
 func startService(name string) error {
 	m, err := mgr.Connect()
 	if err != nil {
@@ -678,7 +676,7 @@ func timingPost(w http.ResponseWriter, r *http.Request) {
 
 	// переребираємо всі елементи масиву об'єктів типу Timing
 	// проводимо синхронізацію з базою даних\
-	for k, _ := range ts {
+	for k := range ts {
 
 		// отримуємо вказівник на елемент масиву
 		// щоб була можливість модифікувати його під час синхроназації
@@ -1152,51 +1150,51 @@ func helpDeskPost(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 
 		return
-	} else {
+	}
 
-		if hd.IsModifiedByMob {
-			_, err = dbase.UpdateHelpDesk(db, hd)
-			if err != nil {
-				http.Error(w, err.Error(), http.StatusInternalServerError)
-				return
-			}
-		} else {
-			var existHelpDesk models.HelpDesk
-
-			rows, err := dbase.SelectHelpDeskByID(db, hd.ID)
-			if err != nil {
-				http.Error(w, err.Error(), http.StatusInternalServerError)
-				return
-			}
-
-			if !rows.Next() {
-				rows.Close()
-				http.Error(w, "no such helpdesk", http.StatusBadRequest)
-				return
-			}
-
-			err = dbase.ScanHelpDesk(rows, &existHelpDesk)
-			rows.Close()
-			if err != nil {
-				http.Error(w, err.Error(), http.StatusInternalServerError)
-				return
-			}
-
-			if existHelpDesk.IsModifiedByMob {
-				http.Error(w, "object already has been updated by mobile database", http.StatusBadRequest)
-				return
-			}
-
-			_, err = dbase.UpdateHelpDesk(db, hd)
-			if err != nil {
-				http.Error(w, err.Error(), http.StatusInternalServerError)
-				return
-			}
-
-			w.WriteHeader(http.StatusOK)
+	if hd.IsModifiedByMob {
+		_, err = dbase.UpdateHelpDesk(db, hd)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
+	} else {
+		var existHelpDesk models.HelpDesk
+
+		rows, err := dbase.SelectHelpDeskByID(db, hd.ID)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		if !rows.Next() {
+			rows.Close()
+			http.Error(w, "no such helpdesk", http.StatusBadRequest)
+			return
+		}
+
+		err = dbase.ScanHelpDesk(rows, &existHelpDesk)
+		rows.Close()
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		if existHelpDesk.IsModifiedByMob {
+			http.Error(w, "object already has been updated by mobile database", http.StatusBadRequest)
+			return
+		}
+
+		_, err = dbase.UpdateHelpDesk(db, hd)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		w.WriteHeader(http.StatusOK)
+		return
 	}
+
 }
 
 func helpDeskGet(w http.ResponseWriter, r *http.Request) {
@@ -1420,62 +1418,61 @@ func payDeskPost(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 
 		return
-	} else {
+	}
 
-		if pd.IsModifiedByMob {
-			_, err = dbase.UpdatePayDesk(db, pd)
-			if err != nil {
-				http.Error(w, err.Error(), http.StatusInternalServerError)
-				return
-			}
-
-			w.WriteHeader(http.StatusOK)
-			return
-		} else {
-			var existPayDesk models.PayDesk
-
-			rows, err := dbase.SelectPayDeskByID(db, pd.ID)
-			if err != nil {
-				http.Error(w, err.Error(), http.StatusInternalServerError)
-				return
-			}
-
-			if !rows.Next() {
-				rows.Close()
-				http.Error(w, "no such paydesk", http.StatusBadRequest)
-				return
-			}
-
-			err = dbase.ScanPayDesk(rows, &existPayDesk)
-			rows.Close()
-			if err != nil {
-				http.Error(w, err.Error(), http.StatusInternalServerError)
-				return
-			}
-
-			if existPayDesk.IsModifiedByMob {
-				http.Error(w, "object already has been updated by mobile database", http.StatusNoContent)
-				return
-			}
-
-			existPayDesk.IsDeleted = pd.IsDeleted
-			existPayDesk.Amount = pd.Amount
-			existPayDesk.Payment = pd.Payment
-			existPayDesk.DocumentDate = pd.DocumentDate
-			existPayDesk.DocumentNumber = pd.DocumentNumber
-			existPayDesk.IsModifiedByMob = pd.IsModifiedByMob
-			existPayDesk.IsModifiedByAcc = pd.IsModifiedByAcc
-
-			_, err = dbase.UpdatePayDesk(db, existPayDesk)
-			if err != nil {
-				http.Error(w, err.Error(), http.StatusInternalServerError)
-				return
-			}
-
-			w.WriteHeader(http.StatusOK)
+	if pd.IsModifiedByMob {
+		_, err = dbase.UpdatePayDesk(db, pd)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
+
+		w.WriteHeader(http.StatusOK)
+		return
 	}
+
+	var existPayDesk models.PayDesk
+
+	rows, err := dbase.SelectPayDeskByID(db, pd.ID)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	if !rows.Next() {
+		rows.Close()
+		http.Error(w, "no such paydesk", http.StatusBadRequest)
+		return
+	}
+
+	err = dbase.ScanPayDesk(rows, &existPayDesk)
+	rows.Close()
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	if existPayDesk.IsModifiedByMob {
+		http.Error(w, "object already has been updated by mobile database", http.StatusNoContent)
+		return
+	}
+
+	existPayDesk.IsDeleted = pd.IsDeleted
+	existPayDesk.Amount = pd.Amount
+	existPayDesk.Payment = pd.Payment
+	existPayDesk.DocumentDate = pd.DocumentDate
+	existPayDesk.DocumentNumber = pd.DocumentNumber
+	existPayDesk.IsModifiedByMob = pd.IsModifiedByMob
+	existPayDesk.IsModifiedByAcc = pd.IsModifiedByAcc
+
+	_, err = dbase.UpdatePayDesk(db, existPayDesk)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	return
 }
 
 func payDeskGet(w http.ResponseWriter, r *http.Request) {
