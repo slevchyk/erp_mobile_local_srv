@@ -126,6 +126,10 @@ func InitDB(db *sql.DB) {
 		CREATE TABLE IF NOT EXISTS pay_desk (
 			id SERIAL PRIMARY KEY,
 			user_id TEXT,
+			cost_item TEXT,
+			income_item TEXT,	
+			from_pay_office TEXT,
+			to_pay_office TEXT,
 			amount FLOAT,
 			payment TEXT,
 			document_number TEXT,

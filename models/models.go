@@ -109,6 +109,10 @@ type HelpDesk struct {
 type PayDesk struct {
 	ID              int                `json:"id"`
 	UserID          string             `json:"user_id"`
+	CostItem        string             `json:"cost_item"`
+	IncomeItem      string             `json:"income_item"`
+	FromPayOffice   string             `json:"from_pay_office"`
+	ToPayOffice     string             `json:"to_pay_office"`
 	Amount          float32            `json:"amount"`
 	Payment         string             `json:"payment"`
 	DocumentNumber  string             `json:"document_number"`

@@ -126,6 +126,8 @@ func webApp() {
 	http.HandleFunc("/api/paydesk", basicAuth(payDeskHandler))
 	http.HandleFunc("/api/paydesk/processed", basicAuth(payDeskProcessedHandler))
 	http.HandleFunc("/api/costitems", basicAuth(costItemsHandler))
+	http.HandleFunc("/api/incomeitems", basicAuth(incomeItemsHandler))
+	http.HandleFunc("/api/payoffices", basicAuth(payOfficesHandler))
 
 	http.HandleFunc("/test", testHandler)
 
@@ -1747,4 +1749,214 @@ func costItemsGet(w http.ResponseWriter, r *http.Request) {
 	}
 	w.WriteHeader(http.StatusOK)
 
+}
+
+func incomeItemsHandler(w http.ResponseWriter, r *http.Request) {
+
+	if r.Method == http.MethodPost {
+		incomeItemsPost(w, r)
+	} else if r.Method == http.MethodGet {
+		incomeItemsGet(w, r)
+	}
+
+}
+
+func incomeItemsPost(w http.ResponseWriter, r *http.Request) {
+	var err error
+	var ii models.IncomeItem
+	var iis []models.IncomeItem
+
+	// зчитуємо тіло запиту
+	bs, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	// конвертуэмо масив байтів в об'єкт типу []IncomeItem
+	err = json.Unmarshal(bs, &iis)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	for _, v := range iis {
+
+		rows, err := dbase.SelectIncomeItemsByAccID(db, v.AccID)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		if rows.Next() {
+			err = dbase.ScanIncomeItem(rows, &ii)
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
+
+			v.ID = ii.ID
+			v.CreatedAt = ii.CreatedAt
+			v.UpdatedAt.Valid = true
+			v.UpdatedAt.Time = time.Now()
+
+			_, err = dbase.UpdateIncomeItem(db, v)
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
+		} else {
+			v.CreatedAt.Valid = true
+			v.CreatedAt.Time = time.Now()
+			_, err = dbase.InsertIncomeItem(db, v)
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
+		}
+		rows.Close()
+	}
+
+	w.WriteHeader(http.StatusOK)
+}
+
+func incomeItemsGet(w http.ResponseWriter, r *http.Request) {
+	var err error
+	var ii models.IncomeItem
+	var iis []models.IncomeItem
+
+	rows, err := dbase.SelectIncomeItems(db)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	for rows.Next() {
+		err = dbase.ScanIncomeItem(rows, &ii)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		iis = append(iis, ii)
+	}
+	rows.Close()
+
+	bs, err := json.Marshal(iis)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	_, err = w.Write(bs)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	w.WriteHeader(http.StatusOK)
+}
+
+func payOfficesHandler(w http.ResponseWriter, r *http.Request) {
+
+	if r.Method == http.MethodPost {
+		payOfficesPost(w, r)
+	} else if r.Method == http.MethodGet {
+		payOfficesGet(w, r)
+	}
+
+}
+
+func payOfficesPost(w http.ResponseWriter, r *http.Request) {
+	var err error
+	var po models.PayOffice
+	var pos []models.PayOffice
+
+	// зчитуємо тіло запиту
+	bs, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	// конвертуэмо масив байтів в об'єкт типу []PayOffice
+	err = json.Unmarshal(bs, &pos)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	for _, v := range pos {
+
+		rows, err := dbase.SelectPayOfficesByAccID(db, v.AccID)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		if rows.Next() {
+			err = dbase.ScanPayOffice(rows, &po)
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
+
+			v.ID = po.ID
+			v.CreatedAt = po.CreatedAt
+			v.UpdatedAt.Valid = true
+			v.UpdatedAt.Time = time.Now()
+
+			_, err = dbase.UpdatePayOffice(db, v)
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
+		} else {
+			v.CreatedAt.Valid = true
+			v.CreatedAt.Time = time.Now()
+			_, err = dbase.InsertPayOffice(db, v)
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
+		}
+		rows.Close()
+	}
+
+	w.WriteHeader(http.StatusOK)
+}
+
+func payOfficesGet(w http.ResponseWriter, r *http.Request) {
+	var err error
+	var po models.PayOffice
+	var pos []models.PayOffice
+
+	rows, err := dbase.SelectPayOffices(db)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	for rows.Next() {
+		err = dbase.ScanPayOffice(rows, &po)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		pos = append(pos, po)
+	}
+	rows.Close()
+
+	bs, err := json.Marshal(pos)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	_, err = w.Write(bs)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	w.WriteHeader(http.StatusOK)
 }

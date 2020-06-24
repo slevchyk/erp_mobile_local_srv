@@ -287,3 +287,61 @@ func UpdateCostItem(db *sql.DB, ci models.CostItem) (sql.Result, error) {
 		ci.ID)
 	return res, err
 }
+
+func UpdateIncomeItem(db *sql.DB, ii models.IncomeItem) (sql.Result, error) {
+
+	var err error
+
+	stmt, err := db.Prepare(`
+			UPDATE
+				income_items
+			SET
+				acc_id = $1,
+				name = $2,				
+				created_at = $3,
+				updated_at = $4,
+				is_deleted =$5				
+			WHERE
+				id=$6
+			`)
+	if err != nil {
+		return nil, err
+	}
+	res, err := stmt.Exec(
+		ii.AccID,
+		ii.Name,
+		ii.CreatedAt,
+		ii.UpdatedAt,
+		ii.IsDeleted,
+		ii.ID)
+	return res, err
+}
+
+func UpdatePayOffice(db *sql.DB, po models.PayOffice) (sql.Result, error) {
+
+	var err error
+
+	stmt, err := db.Prepare(`
+			UPDATE
+				pay_offices
+			SET
+				acc_id = $1,
+				name = $2,				
+				created_at = $3,
+				updated_at = $4,
+				is_deleted =$5				
+			WHERE
+				id=$6
+			`)
+	if err != nil {
+		return nil, err
+	}
+	res, err := stmt.Exec(
+		po.AccID,
+		po.Name,
+		po.CreatedAt,
+		po.UpdatedAt,
+		po.IsDeleted,
+		po.ID)
+	return res, err
+}
