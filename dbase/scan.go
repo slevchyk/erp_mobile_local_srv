@@ -95,13 +95,20 @@ func ScanHelpDesk(rows *sql.Rows, hd *models.HelpDesk) error {
 func ScanPayDesk(rows *sql.Rows, pd *models.PayDesk) error {
 	return rows.Scan(
 		&pd.ID,
+		&pd.PayDeskType,
 		&pd.UserID,
+		&pd.CurrencyAccID,
+		&pd.CostItemAccID,
+		&pd.IncomeItemAccID,
+		&pd.FromPayOfficeAccID,
+		&pd.ToPayOfficeAccID,
 		&pd.Amount,
 		&pd.Payment,
 		&pd.DocumentNumber,
 		&pd.DocumentDate,
 		&pd.FilePaths,
 		&pd.FilesQuantity,
+		&pd.IsChecked,
 		&pd.CreatedAt,
 		&pd.UpdatedAt,
 		&pd.IsDeleted,
@@ -136,9 +143,22 @@ func ScanPayOffice(rows *sql.Rows, po *models.PayOffice) error {
 	return rows.Scan(
 		&po.ID,
 		&po.AccID,
+		&po.CurrencyAccID,
 		&po.Name,
 		&po.CreatedAt,
 		&po.UpdatedAt,
 		&po.IsDeleted,
+	)
+}
+
+func ScanCurrency(rows *sql.Rows, c *models.Currency) error {
+	return rows.Scan(
+		&c.ID,
+		&c.AccID,
+		&c.Code,
+		&c.Name,
+		&c.CreatedAt,
+		&c.UpdatedAt,
+		&c.IsDeleted,
 	)
 }

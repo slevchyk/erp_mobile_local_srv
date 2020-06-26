@@ -331,18 +331,24 @@ func SelectPayDeskByID(db *sql.DB, id int) (*sql.Rows, error) {
 	return db.Query(`
 		SELECT
 			pd.id,
-		    pd.user_id,
-		    pd.amount,
-		    pd.payment,
-		    pd.document_number,
+			pd.user_id,
+			pd.	currency_acc_id,
+			pd.cost_item_acc_id,
+			pd.income_item_acc_id,	
+			pd.from_pay_office_acc_id,
+			pd.to_pay_office_acc_id,
+			pd.amount,
+			pd.payment,
+			pd.document_number,
 			pd.document_date,
 			pd.file_paths,
 			pd.files_quantity,
-		    pd.created_at,
-			pd.updated_at,	
-			is_deleted,			    		    	    
-		    pd.is_modified_by_mob,
-		    pd.is_modified_by_acc		       
+			pd.checked,
+			pd.created_at,
+			pd.updated_at,
+			pd.is_deleted,			    
+			pd.is_modified_by_mob,
+			pd.is_modified_by_acc		       
 		FROM 
 			pay_desk pd
 		WHERE
@@ -353,18 +359,24 @@ func SelectPayDeskModifiedByMob(db *sql.DB) (*sql.Rows, error) {
 	return db.Query(`
 		SELECT
 			pd.id,
-		    pd.user_id,
-		    pd.amount,
-		    pd.payment,
-		    pd.document_number,
+			pd.user_id,
+			pd.	currency_acc_id,
+			pd.cost_item_acc_id,
+			pd.income_item_acc_id,	
+			pd.from_pay_office_acc_id,
+			pd.to_pay_office_acc_id,
+			pd.amount,
+			pd.payment,
+			pd.document_number,
 			pd.document_date,
 			pd.file_paths,
 			pd.files_quantity,
-		    pd.created_at,
+			pd.is_checked,
+			pd.created_at,
 			pd.updated_at,
-			is_deleted,			    		    		    
-		    pd.is_modified_by_mob,
-		    pd.is_modified_by_acc		       
+			pd.is_deleted,			    
+			pd.is_modified_by_mob,
+			pd.is_modified_by_acc		       
 		FROM 
 			pay_desk pd
 		WHERE
@@ -376,17 +388,23 @@ func SelectPayDeskModifiedByAcc(db *sql.DB, userID string) (*sql.Rows, error) {
 		SELECT
 			pd.id,
 		    pd.user_id,
-		    pd.amount,
-		    pd.payment,
-		    pd.document_number,
+			pd.	currency_acc_id,
+			pd.cost_item_acc_id,
+			pd.income_item_acc_id,	
+			pd.from_pay_office_acc_id,
+			pd.to_pay_office_acc_id,
+			pd.amount,
+			pd.payment,
+			pd.document_number,
 			pd.document_date,
 			pd.file_paths,
 			pd.files_quantity,
-		    pd.created_at,
+			pd.checked,
+			pd.created_at,
 			pd.updated_at,
-			pd.is_deleted,			    		    
-		    pd.is_modified_by_mob,
-		    pd.is_modified_by_acc		       
+			pd.is_deleted,			    
+			pd.is_modified_by_mob,
+			pd.is_modified_by_acc		       
 		FROM 
 			pay_desk pd
 		WHERE
@@ -404,9 +422,7 @@ func SelectCostItems(db *sql.DB) (*sql.Rows, error) {
 			ci.updated_at,
 			ci.is_deleted
 		FROM 
-			cost_items ci
-		WHERE
-			ci.is_deleted=false`)
+			cost_items ci`)
 }
 
 func SelectCostItemsByAccID(db *sql.DB, accID string) (*sql.Rows, error) {
@@ -421,8 +437,7 @@ func SelectCostItemsByAccID(db *sql.DB, accID string) (*sql.Rows, error) {
 		FROM 
 			cost_items ci
 		WHERE
-			ci.is_deleted=false
-			AND ci.acc_id = $1`, accID)
+			ci.acc_id = $1`, accID)
 }
 
 func SelectIncomeItems(db *sql.DB) (*sql.Rows, error) {
@@ -435,9 +450,7 @@ func SelectIncomeItems(db *sql.DB) (*sql.Rows, error) {
 			ii.updated_at,
 			ii.is_deleted
 		FROM 
-		income_items ii
-		WHERE
-			ii.is_deleted=false`)
+			income_items ii`)
 }
 
 func SelectIncomeItemsByAccID(db *sql.DB, accID string) (*sql.Rows, error) {
@@ -452,37 +465,65 @@ func SelectIncomeItemsByAccID(db *sql.DB, accID string) (*sql.Rows, error) {
 		FROM 
 			income_items ii
 		WHERE
-			ii.is_deleted=false
-			AND ii.acc_id = $1`, accID)
+			ii.acc_id = $1`, accID)
 }
 
 func SelectPayOffices(db *sql.DB) (*sql.Rows, error) {
 	return db.Query(`
 		SELECT
 			po.id,
-			po.acc_id,
-			po.name,		
+			po.acc_id,			
+			po.currency_acc_id,	
+			po.name,	
 			po.created_at,
 			po.updated_at,
 			po.is_deleted
 		FROM 
-			pay_offices po
-		WHERE
-			po.is_deleted=false`)
+			pay_offices po`)
 }
 
 func SelectPayOfficesByAccID(db *sql.DB, accID string) (*sql.Rows, error) {
 	return db.Query(`
 		SELECT
 			po.id,
-			po.acc_id,
-			po.name,		
+			po.acc_id,			
+			po.currency_acc_id,	
+			po.name,
 			po.created_at,
 			po.updated_at,
 			po.is_deleted
 		FROM 
 			pay_offices po
 		WHERE
-			po.is_deleted=false
-			AND po.acc_id = $1`, accID)
+			po.acc_id = $1`, accID)
+}
+
+func SelectCurrency(db *sql.DB) (*sql.Rows, error) {
+	return db.Query(`
+		SELECT
+			c.id,
+			c.acc_id,
+			c.code,
+			c.name,		
+			c.created_at,
+			c.updated_at,
+			c.is_deleted
+		FROM 
+			currency c`)
+}
+
+func SelectCurrencyByAccID(db *sql.DB, accID string) (*sql.Rows, error) {
+	return db.Query(`
+		SELECT
+			c.id,
+			c.acc_id,
+			c.code,
+			c.name,		
+			c.created_at,
+			c.updated_at,
+			c.is_deleted
+		FROM 
+			currency c
+		WHERE
+			c.acc_id = $1`, accID)
 }

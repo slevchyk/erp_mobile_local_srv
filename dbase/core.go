@@ -125,17 +125,20 @@ func InitDB(db *sql.DB) {
 	_, err = db.Exec(`
 		CREATE TABLE IF NOT EXISTS pay_desk (
 			id SERIAL PRIMARY KEY,
+			pay_desk_type INTEGER,
 			user_id TEXT,
-			cost_item TEXT,
-			income_item TEXT,	
-			from_pay_office TEXT,
-			to_pay_office TEXT,
+			currency_acc_id TEXT,
+			cost_item_acc_id TEXT,
+			income_item_acc_id TEXT,	
+			from_pay_office_acc_id TEXT,
+			to_pay_office_acc_id TEXT,
 			amount FLOAT,
 			payment TEXT,
 			document_number TEXT,
 			document_date TIMESTAMP,
 			file_paths TEXT DEFAULT '', 
 			files_quantity INTEGER DEFAULT 0,
+			is_checked BOOLEAN,
 			created_at TIMESTAMP,
 			updated_at TIMESTAMP,			
 			is_deleted BOOLEAN DEFAULT false,
@@ -176,6 +179,21 @@ func InitDB(db *sql.DB) {
 		CREATE TABLE IF NOT EXISTS pay_offices (
 			id SERIAL PRIMARY KEY,
 			acc_id TEXT,
+			name TEXT,
+			currency_acc_id TEXT,
+			created_at TIMESTAMP,
+			updated_at TIMESTAMP,			
+			is_deleted BOOLEAN DEFAULT false);
+			`)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	_, err = db.Exec(`
+		CREATE TABLE IF NOT EXISTS currency (
+			id SERIAL PRIMARY KEY,	
+			acc_id TEXT,			
+			code INTEGER,
 			name TEXT,
 			created_at TIMESTAMP,
 			updated_at TIMESTAMP,			

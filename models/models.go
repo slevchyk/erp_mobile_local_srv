@@ -107,23 +107,26 @@ type HelpDesk struct {
 }
 
 type PayDesk struct {
-	ID              int                `json:"id"`
-	UserID          string             `json:"user_id"`
-	CostItem        string             `json:"cost_item"`
-	IncomeItem      string             `json:"income_item"`
-	FromPayOffice   string             `json:"from_pay_office"`
-	ToPayOffice     string             `json:"to_pay_office"`
-	Amount          float32            `json:"amount"`
-	Payment         string             `json:"payment"`
-	DocumentNumber  string             `json:"document_number"`
-	DocumentDate    NullTime           `json:"document_date"`
-	FilePaths       string             `json:"file_paths"`
-	FilesQuantity   int                `json:"files_quantity"`
-	CreatedAt       NullTime           `json:"created_at"`
-	UpdatedAt       NullTime           `json:"updated_at"`
-	IsDeleted       ConvertibleBoolean `json:"is_deleted"`
-	IsModifiedByMob ConvertibleBoolean `json:"-"`
-	IsModifiedByAcc ConvertibleBoolean `json:"-"`
+	ID                 int                `json:"id"`
+	PayDeskType        int                `json:"pay_desk_type"`
+	UserID             string             `json:"user_id"`
+	CurrencyAccID      string             `json:"currency_acc_id"`
+	CostItemAccID      string             `json:"cost_item_acc_id"`
+	IncomeItemAccID    string             `json:"income_item_acc_id"`
+	FromPayOfficeAccID string             `json:"from_pay_office_acc_id"`
+	ToPayOfficeAccID   string             `json:"to_pay_office_acc_id"`
+	Amount             float32            `json:"amount"`
+	Payment            string             `json:"payment"`
+	DocumentNumber     string             `json:"document_number"`
+	DocumentDate       NullTime           `json:"document_date"`
+	FilePaths          string             `json:"file_paths"`
+	FilesQuantity      int                `json:"files_quantity"`
+	IsChecked          ConvertibleBoolean `json:"is_checked"`
+	CreatedAt          NullTime           `json:"created_at"`
+	UpdatedAt          NullTime           `json:"updated_at"`
+	IsDeleted          ConvertibleBoolean `json:"is_deleted"`
+	IsModifiedByMob    ConvertibleBoolean `json:"-"`
+	IsModifiedByAcc    ConvertibleBoolean `json:"-"`
 }
 
 type CostItem struct {
@@ -145,8 +148,19 @@ type IncomeItem struct {
 }
 
 type PayOffice struct {
+	ID            int                `json:"id"`
+	AccID         string             `json:"acc_id"`
+	Name          string             `json:"name"`
+	CurrencyAccID string             `json:"currency_acc_id"`
+	CreatedAt     NullTime           `json:"created_at"`
+	UpdatedAt     NullTime           `json:"updated_at"`
+	IsDeleted     ConvertibleBoolean `json:"is_deleted"`
+}
+
+type Currency struct {
 	ID        int                `json:"id"`
 	AccID     string             `json:"acc_id"`
+	Code      int                `json:"code"`
 	Name      string             `json:"name"`
 	CreatedAt NullTime           `json:"created_at"`
 	UpdatedAt NullTime           `json:"updated_at"`

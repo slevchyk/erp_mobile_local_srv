@@ -186,27 +186,41 @@ func InsertPayDesk(db *sql.DB, pd models.PayDesk) (int64, error) {
 	err := db.QueryRow(`
 		INSERT INTO
 			pay_desk (
+				pay_desk_type,
 				user_id,
+				currency_acc_id,
+				cost_item_acc_id,
+				income_item_acc_id,	
+				from_pay_office_acc_id,
+				to_pay_office_acc_id,
 				amount,
 			    payment,
 			    document_number,
 				document_date,
 				file_paths,
 				files_quantity,
+				is_checked,
 			    created_at,
 				updated_at,
 				is_deleted,			    
 			    is_modified_by_mob,
 			    is_modified_by_acc
 			)
-		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) RETURNING id`,
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19) RETURNING id`,
+		pd.PayDeskType,
 		pd.UserID,
+		pd.CurrencyAccID,
+		pd.CostItemAccID,
+		pd.IncomeItemAccID,
+		pd.FromPayOfficeAccID,
+		pd.ToPayOfficeAccID,
 		pd.Amount,
 		pd.Payment,
 		pd.DocumentNumber,
 		pd.DocumentDate,
 		pd.FilePaths,
 		pd.FilesQuantity,
+		pd.IsChecked,
 		pd.CreatedAt,
 		pd.UpdatedAt,
 		pd.IsDeleted,
@@ -271,17 +285,44 @@ func InsertPayOffice(db *sql.DB, po models.PayOffice) (int64, error) {
 		INSERT INTO
 			pay_offices (
 				acc_id,
+				name,	
+				currency_acc_id,		    
+			    created_at,
+				updated_at,
+				is_deleted
+			)
+		VALUES ($1, $2, $3, $4, $5, $6) RETURNING id`,
+		po.AccID,
+		po.Name,
+		po.CurrencyAccID,
+		po.CreatedAt,
+		po.UpdatedAt,
+		po.IsDeleted).
+		Scan(&lastInsertId)
+
+	return lastInsertId, err
+}
+
+func InsertCurrency(db *sql.DB, c models.Currency) (int64, error) {
+	var lastInsertId int64
+
+	err := db.QueryRow(`
+		INSERT INTO
+			currency (
+				acc_id,
+				code,
 				name,			    
 			    created_at,
 				updated_at,
 				is_deleted
 			)
-		VALUES ($1, $2, $3, $4, $5) RETURNING id`,
-		po.AccID,
-		po.Name,
-		po.CreatedAt,
-		po.UpdatedAt,
-		po.IsDeleted).
+		VALUES ($1, $2, $3, $4, $5, $6) RETURNING id`,
+		c.AccID,
+		c.Code,
+		c.Name,
+		c.CreatedAt,
+		c.UpdatedAt,
+		c.IsDeleted).
 		Scan(&lastInsertId)
 
 	return lastInsertId, err

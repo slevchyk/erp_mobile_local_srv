@@ -128,6 +128,7 @@ func webApp() {
 	http.HandleFunc("/api/costitems", basicAuth(costItemsHandler))
 	http.HandleFunc("/api/incomeitems", basicAuth(incomeItemsHandler))
 	http.HandleFunc("/api/payoffices", basicAuth(payOfficesHandler))
+	http.HandleFunc("/api/currency", basicAuth(currencyHandler))
 
 	http.HandleFunc("/test", testHandler)
 
@@ -1948,6 +1949,111 @@ func payOfficesGet(w http.ResponseWriter, r *http.Request) {
 	rows.Close()
 
 	bs, err := json.Marshal(pos)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	_, err = w.Write(bs)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	w.WriteHeader(http.StatusOK)
+}
+
+func currencyHandler(w http.ResponseWriter, r *http.Request) {
+
+	if r.Method == http.MethodPost {
+		currencyPost(w, r)
+	} else if r.Method == http.MethodGet {
+		currencyGet(w, r)
+	}
+
+}
+
+func currencyPost(w http.ResponseWriter, r *http.Request) {
+	var err error
+	var c models.Currency
+	var cs []models.Currency
+
+	// зчитуємо тіло запиту
+	bs, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	// конвертуэмо масив байтів в об'єкт типу []PayOffice
+	err = json.Unmarshal(bs, &cs)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	for _, v := range cs {
+
+		rows, err := dbase.SelectCurrencyByAccID(db, v.AccID)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		if rows.Next() {
+			err = dbase.ScanCurrency(rows, &c)
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
+
+			v.ID = c.ID
+			v.CreatedAt = c.CreatedAt
+			v.UpdatedAt.Valid = true
+			v.UpdatedAt.Time = time.Now()
+
+			_, err = dbase.UpdateCurrency(db, v)
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
+		} else {
+			v.CreatedAt.Valid = true
+			v.CreatedAt.Time = time.Now()
+			_, err = dbase.InsertCurrency(db, v)
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
+		}
+		rows.Close()
+	}
+
+	w.WriteHeader(http.StatusOK)
+}
+
+func currencyGet(w http.ResponseWriter, r *http.Request) {
+	var err error
+	var c models.Currency
+	var cs []models.Currency
+
+	rows, err := dbase.SelectCurrency(db)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	for rows.Next() {
+		err = dbase.ScanCurrency(rows, &c)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		cs = append(cs, c)
+	}
+	rows.Close()
+
+	bs, err := json.Marshal(cs)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

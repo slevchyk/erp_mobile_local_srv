@@ -224,32 +224,46 @@ func UpdatePayDesk(db *sql.DB, pd models.PayDesk) (sql.Result, error) {
 			UPDATE
 				pay_desk
 			SET
-				user_id = $1,
-				amount = $2,
-				payment = $3,
-				document_number = $4,
-				document_date = $5,
-				file_paths = $6,
-				files_quantity = $7,
-				created_at = $8,
-				updated_at = $9,
-				is_deleted =$10,			    				
-				is_modified_by_mob = $11,
-				is_modified_by_acc = $12			
+				pay_desk_type = $1,
+				user_id = $2, 
+				currency_acc_id = $3,
+				cost_item_acc_id = $4,
+				income_item_acc_id = $5,	
+				from_pay_office_acc_id = $6,
+				to_pay_office_acc_id = $7,
+				amount = $8,
+				payment = $9,
+				document_number = $10,
+				document_date = $11,
+				file_paths = $12,
+				files_quantity = $13,
+				is_checked = $14,
+				created_at = $15,
+				updated_at = $16,
+				is_deleted =$17,			    				
+				is_modified_by_mob = $18,
+				is_modified_by_acc = $19			
 			WHERE
-				id=$13
+				id=$20
 			`)
 	if err != nil {
 		return nil, err
 	}
 	res, err := stmt.Exec(
+		pd.PayDeskType,
 		pd.UserID,
+		pd.CurrencyAccID,
+		pd.CostItemAccID,
+		pd.IncomeItemAccID,
+		pd.FromPayOfficeAccID,
+		pd.ToPayOfficeAccID,
 		pd.Amount,
 		pd.Payment,
 		pd.DocumentNumber,
 		pd.DocumentDate,
 		pd.FilePaths,
 		pd.FilesQuantity,
+		pd.IsChecked,
 		pd.CreatedAt,
 		pd.UpdatedAt,
 		pd.IsDeleted,
@@ -326,22 +340,55 @@ func UpdatePayOffice(db *sql.DB, po models.PayOffice) (sql.Result, error) {
 				pay_offices
 			SET
 				acc_id = $1,
-				name = $2,				
-				created_at = $3,
-				updated_at = $4,
-				is_deleted =$5				
+				currency_acc_id = $2,
+				name = $3,				
+				created_at = $4,
+				updated_at = $5,
+				is_deleted =$6				
 			WHERE
-				id=$6
+				id=$7
 			`)
 	if err != nil {
 		return nil, err
 	}
 	res, err := stmt.Exec(
 		po.AccID,
+		po.CurrencyAccID,
 		po.Name,
 		po.CreatedAt,
 		po.UpdatedAt,
 		po.IsDeleted,
 		po.ID)
+	return res, err
+}
+
+func UpdateCurrency(db *sql.DB, c models.Currency) (sql.Result, error) {
+
+	var err error
+
+	stmt, err := db.Prepare(`
+			UPDATE
+				currency
+			SET
+				acc_id = $1,
+				code = $2,
+				name = $3,				
+				created_at = $4,
+				updated_at = $5,
+				is_deleted =$6				
+			WHERE
+				id=$7
+			`)
+	if err != nil {
+		return nil, err
+	}
+	res, err := stmt.Exec(
+		c.AccID,
+		c.Code,
+		c.Name,
+		c.CreatedAt,
+		c.UpdatedAt,
+		c.IsDeleted,
+		c.ID)
 	return res, err
 }
