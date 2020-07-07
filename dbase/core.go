@@ -203,4 +203,16 @@ func InitDB(db *sql.DB) {
 		log.Fatal(err)
 	}
 
+	_, err = db.Exec(`
+		CREATE TABLE IF NOT EXISTS user_grants (
+			user_id TEXT,			
+			odject_type INTEGER,
+			odject_acc_id TEXT,
+			is_visible BOOLEAN DEFAULT false,
+			is_available BOOLEAN DEFAULT false);
+			`)
+	if err != nil {
+		log.Fatal(err)
+	}
+
 }

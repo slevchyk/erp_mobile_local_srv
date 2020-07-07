@@ -166,3 +166,11 @@ type Currency struct {
 	UpdatedAt NullTime           `json:"updated_at"`
 	IsDeleted ConvertibleBoolean `json:"is_deleted"`
 }
+
+type UserGrants struct {
+	UserID      string             `json:"user_id"`
+	ObjectType  int                `json:"odject_type"`
+	ObjectAccID string             `json:"odject_acc_id"`
+	IsVisible   ConvertibleBoolean `json:"is_visible"`
+	IsAvailable ConvertibleBoolean `json:"is_available"`
+}

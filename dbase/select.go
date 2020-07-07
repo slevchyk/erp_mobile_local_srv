@@ -527,3 +527,44 @@ func SelectCurrencyByAccID(db *sql.DB, accID string) (*sql.Rows, error) {
 		WHERE
 			c.acc_id = $1`, accID)
 }
+
+func SelectUserGrants(db *sql.DB) (*sql.Rows, error) {
+	return db.Query(`
+		SELECT
+			ug.user_id,
+			ug.odject_type,
+			ug.is_visible,
+			ug.is_available
+		FROM 
+			user_grants ug`)
+}
+
+func SelectUserGrantsByUserID(db *sql.DB, userID string) (*sql.Rows, error) {
+	return db.Query(`
+		SELECT
+			ug.user_id,
+			ug.odject_type,
+			ug.odject_acc_id,
+			ug.is_visible,
+			ug.is_available
+		FROM 
+			user_grants ug
+		WHERE
+			ug.user_id = $1`, userID)
+}
+
+func SelectUserGrantsByUserIDObject(db *sql.DB, userID string, objectType int, objectAccID string) (*sql.Rows, error) {
+	return db.Query(`
+		SELECT
+			ug.user_id,
+			ug.odject_type,
+			ug.odject_acc_id,
+			ug.is_visible,
+			ug.is_available
+		FROM 
+			user_grants ug
+		WHERE
+			ug.user_id = $1
+			AND ug.odject_type = $2
+			AND ug.odject_acc_id = $3`, userID, objectType, objectAccID)
+}

@@ -392,3 +392,30 @@ func UpdateCurrency(db *sql.DB, c models.Currency) (sql.Result, error) {
 		c.ID)
 	return res, err
 }
+
+func UpdateUserGrants(db *sql.DB, ug models.UserGrants) (sql.Result, error) {
+
+	var err error
+
+	stmt, err := db.Prepare(`
+			UPDATE
+				user_grants
+			SET				
+				is_visible = $1,				
+				is_available = $2			
+			WHERE
+				user_id=$3
+				AND odject_type = $4
+				AND odject_acc_id = $5
+			`)
+	if err != nil {
+		return nil, err
+	}
+	res, err := stmt.Exec(
+		ug.IsVisible,
+		ug.IsAvailable,
+		ug.UserID,
+		ug.ObjectType,
+		ug.ObjectAccID)
+	return res, err
+}

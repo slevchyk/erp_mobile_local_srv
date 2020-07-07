@@ -327,3 +327,26 @@ func InsertCurrency(db *sql.DB, c models.Currency) (int64, error) {
 
 	return lastInsertId, err
 }
+
+func InsertUserGrants(db *sql.DB, ug models.UserGrants) (string, error) {
+	var lastInsertUserId string
+
+	err := db.QueryRow(`
+		INSERT INTO
+			user_grants (
+				user_id,
+				odject_type,
+				odject_acc_id,
+				is_visible,			    
+			    is_available
+			)
+		VALUES ($1, $2, $3, $4, $5) RETURNING user_id`,
+		ug.UserID,
+		ug.ObjectType,
+		ug.ObjectAccID,
+		ug.IsVisible,
+		ug.IsAvailable).
+		Scan(&lastInsertUserId)
+
+	return lastInsertUserId, err
+}

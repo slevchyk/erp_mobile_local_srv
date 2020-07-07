@@ -162,3 +162,13 @@ func ScanCurrency(rows *sql.Rows, c *models.Currency) error {
 		&c.IsDeleted,
 	)
 }
+
+func ScanUserGrants(rows *sql.Rows, ug *models.UserGrants) error {
+	return rows.Scan(
+		&ug.UserID,
+		&ug.ObjectType,
+		&ug.ObjectAccID,
+		&ug.IsVisible,
+		&ug.IsAvailable,
+	)
+}

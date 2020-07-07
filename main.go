@@ -129,6 +129,7 @@ func webApp() {
 	http.HandleFunc("/api/incomeitems", basicAuth(incomeItemsHandler))
 	http.HandleFunc("/api/payoffices", basicAuth(payOfficesHandler))
 	http.HandleFunc("/api/currency", basicAuth(currencyHandler))
+	http.HandleFunc("/api/usergrants", basicAuth(userGrantsHandler))
 
 	http.HandleFunc("/test", testHandler)
 
@@ -2054,6 +2055,114 @@ func currencyGet(w http.ResponseWriter, r *http.Request) {
 	rows.Close()
 
 	bs, err := json.Marshal(cs)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	_, err = w.Write(bs)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	w.WriteHeader(http.StatusOK)
+}
+
+func userGrantsHandler(w http.ResponseWriter, r *http.Request) {
+
+	if r.Method == http.MethodPost {
+		userGrantsPost(w, r)
+	} else if r.Method == http.MethodGet {
+		userGrantsGet(w, r)
+	}
+
+}
+
+func userGrantsPost(w http.ResponseWriter, r *http.Request) {
+	var err error
+	var ug models.UserGrants
+	var ugs []models.UserGrants
+
+	// зчитуємо тіло запиту
+	bs, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	// конвертуэмо масив байтів в об'єкт типу []UserGrants
+	err = json.Unmarshal(bs, &ugs)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	for _, v := range ugs {
+
+		rows, err := dbase.SelectUserGrantsByUserIDObject(db, v.UserID, v.ObjectType, v.ObjectAccID)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		if rows.Next() {
+			err = dbase.ScanUserGrants(rows, &ug)
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
+
+			v.UserID = ug.UserID
+			v.ObjectType = ug.ObjectType
+
+			_, err = dbase.UpdateUserGrants(db, v)
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
+		} else {
+			_, err = dbase.InsertUserGrants(db, v)
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
+		}
+		rows.Close()
+	}
+
+	w.WriteHeader(http.StatusOK)
+}
+
+func userGrantsGet(w http.ResponseWriter, r *http.Request) {
+	var err error
+	var ug models.UserGrants
+	var ugs []models.UserGrants
+
+	fvUserID := r.FormValue("userid")
+
+	if fvUserID == "" {
+		http.Error(w, "incorrect \"userid\" param", http.StatusBadRequest)
+		return
+	}
+
+	rows, err := dbase.SelectUserGrantsByUserID(db, fvUserID)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	for rows.Next() {
+		err = dbase.ScanUserGrants(rows, &ug)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		ugs = append(ugs, ug)
+	}
+	rows.Close()
+
+	bs, err := json.Marshal(ugs)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
