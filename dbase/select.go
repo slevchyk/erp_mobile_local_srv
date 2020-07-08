@@ -331,6 +331,7 @@ func SelectPayDeskByID(db *sql.DB, id int) (*sql.Rows, error) {
 	return db.Query(`
 		SELECT
 			pd.id,
+			pd.pay_desk_type,
 			pd.user_id,
 			pd.	currency_acc_id,
 			pd.cost_item_acc_id,
@@ -359,6 +360,7 @@ func SelectPayDeskModifiedByMob(db *sql.DB) (*sql.Rows, error) {
 	return db.Query(`
 		SELECT
 			pd.id,
+			pd.pay_desk_type,
 			pd.user_id,
 			pd.	currency_acc_id,
 			pd.cost_item_acc_id,
@@ -387,6 +389,7 @@ func SelectPayDeskModifiedByAcc(db *sql.DB, userID string) (*sql.Rows, error) {
 	return db.Query(`
 		SELECT
 			pd.id,
+			pd.pay_desk_type,
 		    pd.user_id,
 			pd.	currency_acc_id,
 			pd.cost_item_acc_id,
