@@ -27,6 +27,7 @@ func (nt NullTime) Value() (driver.Value, error) {
 	return nt.Time, nil
 }
 
+//UnmarshalJSON override typical method
 func (nt *NullTime) UnmarshalJSON(data []byte) error {
 	var err error
 
@@ -65,6 +66,7 @@ func (nt *NullTime) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+//MarshalJSON overrride typcal method
 func (nt NullTime) MarshalJSON() ([]byte, error) {
 	var asString string
 
