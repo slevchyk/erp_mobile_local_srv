@@ -2,8 +2,10 @@ package models
 
 import "fmt"
 
+//ConvertibleBoolean special type for scan sql rows with Null data for bool type variables
 type ConvertibleBoolean bool
 
+//UnmarshalJSON override typical method
 func (bit *ConvertibleBoolean) UnmarshalJSON(data []byte) error {
 	asString := string(data)
 	if asString == "1" || asString == "true" {
