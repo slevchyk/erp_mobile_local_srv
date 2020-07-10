@@ -362,6 +362,29 @@ func UpdatePayOffice(db *sql.DB, po models.PayOffice) (sql.Result, error) {
 	return res, err
 }
 
+func UpdatePayOfficeBalance(db *sql.DB, pob models.PayOfficeBalance) (sql.Result, error) {
+
+	var err error
+
+	stmt, err := db.Prepare(`
+			UPDATE
+				pay_offices_balance
+			SET
+				balance = $1,
+				updated_at = $2				
+			WHERE
+				acc_id=$7
+			`)
+	if err != nil {
+		return nil, err
+	}
+	res, err := stmt.Exec(
+		pob.Balance,
+		pob.UpdatedAt,
+		pob.AccID)
+	return res, err
+}
+
 func UpdateCurrency(db *sql.DB, c models.Currency) (sql.Result, error) {
 
 	var err error

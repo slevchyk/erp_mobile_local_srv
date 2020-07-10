@@ -303,6 +303,25 @@ func InsertPayOffice(db *sql.DB, po models.PayOffice) (int64, error) {
 	return lastInsertId, err
 }
 
+func InsertPayOfficeBalance(db *sql.DB, pob models.PayOfficeBalance) (string, error) {
+	var lastInsertAccId string
+
+	err := db.QueryRow(`
+		INSERT INTO
+			pay_offices_balance (
+				acc_id,
+				balance,		    			    
+				updated_at
+			)
+		VALUES ($1, $2, $3) RETURNING acc_id`,
+		pob.AccID,
+		pob.Balance,
+		pob.UpdatedAt).
+		Scan(&lastInsertAccId)
+
+	return lastInsertAccId, err
+}
+
 func InsertCurrency(db *sql.DB, c models.Currency) (int64, error) {
 	var lastInsertId int64
 

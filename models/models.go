@@ -157,6 +157,12 @@ type PayOffice struct {
 	IsDeleted     ConvertibleBoolean `json:"is_deleted"`
 }
 
+type PayOfficeBalance struct {
+	AccID     string   `json:"acc_id"`
+	Balance   float32  `json:"balance"`
+	UpdatedAt NullTime `json:"updated_at"`
+}
+
 type Currency struct {
 	ID        int                `json:"id"`
 	AccID     string             `json:"acc_id"`

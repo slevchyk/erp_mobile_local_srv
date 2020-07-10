@@ -190,6 +190,16 @@ func InitDB(db *sql.DB) {
 	}
 
 	_, err = db.Exec(`
+		CREATE TABLE IF NOT EXISTS pay_offices_balance (
+			acc_id TEXT,
+			balance FLOAT,			
+			updated_at TIMESTAMP);
+			`)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	_, err = db.Exec(`
 		CREATE TABLE IF NOT EXISTS currency (
 			id SERIAL PRIMARY KEY,	
 			acc_id TEXT,			

@@ -151,6 +151,14 @@ func ScanPayOffice(rows *sql.Rows, po *models.PayOffice) error {
 	)
 }
 
+func ScanPayOfficeBalance(rows *sql.Rows, pob *models.PayOfficeBalance) error {
+	return rows.Scan(
+		&pob.AccID,
+		&pob.Balance,
+		&pob.UpdatedAt,
+	)
+}
+
 func ScanCurrency(rows *sql.Rows, c *models.Currency) error {
 	return rows.Scan(
 		&c.ID,

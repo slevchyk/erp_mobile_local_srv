@@ -128,6 +128,7 @@ func webApp() {
 	http.HandleFunc("/api/costitems", basicAuth(costItemsHandler))
 	http.HandleFunc("/api/incomeitems", basicAuth(incomeItemsHandler))
 	http.HandleFunc("/api/payoffices", basicAuth(payOfficesHandler))
+	http.HandleFunc("/api/payoffices/balance", basicAuth(payOfficesBalanceHandler))
 	http.HandleFunc("/api/currency", basicAuth(currencyHandler))
 	http.HandleFunc("/api/usergrants", basicAuth(userGrantsHandler))
 
@@ -2163,6 +2164,104 @@ func userGrantsGet(w http.ResponseWriter, r *http.Request) {
 	rows.Close()
 
 	bs, err := json.Marshal(ugs)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	_, err = w.Write(bs)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	w.WriteHeader(http.StatusOK)
+}
+
+func payOfficesBalanceHandler(w http.ResponseWriter, r *http.Request) {
+
+	if r.Method == http.MethodPost {
+		payOfficesBalancePost(w, r)
+	} else if r.Method == http.MethodGet {
+		payOfficesBalanceGet(w, r)
+	}
+
+}
+
+func payOfficesBalancePost(w http.ResponseWriter, r *http.Request) {
+	var err error
+	var pob models.PayOfficeBalance
+	var pobs []models.PayOfficeBalance
+
+	// зчитуємо тіло запиту
+	bs, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	// конвертуэмо масив байтів в об'єкт типу []UserGrants
+	err = json.Unmarshal(bs, &pobs)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	for _, v := range pobs {
+
+		rows, err := dbase.SelectPayOfficesBalanceByAccID(db, v.AccID)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		if rows.Next() {
+			err = dbase.ScanPayOfficeBalance(rows, &pob)
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
+
+			_, err = dbase.UpdatePayOfficeBalance(db, v)
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
+		} else {
+			_, err = dbase.InsertPayOfficeBalance(db, v)
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
+		}
+		rows.Close()
+	}
+
+	w.WriteHeader(http.StatusOK)
+}
+
+func payOfficesBalanceGet(w http.ResponseWriter, r *http.Request) {
+	var err error
+	var pob models.PayOfficeBalance
+	var pobs []models.PayOfficeBalance
+
+	rows, err := dbase.SelectPayOfficesBalance(db)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	for rows.Next() {
+		err = dbase.ScanPayOfficeBalance(rows, &pob)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		pobs = append(pobs, pob)
+	}
+	rows.Close()
+
+	bs, err := json.Marshal(pobs)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

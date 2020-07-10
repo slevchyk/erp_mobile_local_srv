@@ -501,6 +501,28 @@ func SelectPayOfficesByAccID(db *sql.DB, accID string) (*sql.Rows, error) {
 			po.acc_id = $1`, accID)
 }
 
+func SelectPayOfficesBalance(db *sql.DB) (*sql.Rows, error) {
+	return db.Query(`
+		SELECT
+			pob.acc_id,			
+			pob.balance,	
+			pob.updated_at			
+		FROM 
+			pay_offices_balance pob`)
+}
+
+func SelectPayOfficesBalanceByAccID(db *sql.DB, accID string) (*sql.Rows, error) {
+	return db.Query(`
+		SELECT
+			pob.acc_id,			
+			pob.balance,	
+			pob.updated_at			
+		FROM 
+			pay_offices_balance pob
+		WHERE
+			pob.acc_id = $1`, accID)
+}
+
 func SelectCurrency(db *sql.DB) (*sql.Rows, error) {
 	return db.Query(`
 		SELECT
