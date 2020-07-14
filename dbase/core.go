@@ -219,7 +219,8 @@ func InitDB(db *sql.DB) {
 			odject_type INTEGER,
 			odject_acc_id TEXT,
 			is_visible BOOLEAN DEFAULT false,
-			is_available BOOLEAN DEFAULT false);
+			is_available BOOLEAN DEFAULT false,
+			is_receiver BOOLEAN DEFAULT false);
 			`)
 	if err != nil {
 		log.Fatal(err)

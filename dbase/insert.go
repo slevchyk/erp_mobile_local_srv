@@ -357,14 +357,16 @@ func InsertUserGrants(db *sql.DB, ug models.UserGrants) (string, error) {
 				odject_type,
 				odject_acc_id,
 				is_visible,			    
-			    is_available
+				is_available,
+				is_receiver
 			)
 		VALUES ($1, $2, $3, $4, $5) RETURNING user_id`,
 		ug.UserID,
 		ug.ObjectType,
 		ug.ObjectAccID,
 		ug.IsVisible,
-		ug.IsAvailable).
+		ug.IsAvailable,
+		ug.IsReceiver).
 		Scan(&lastInsertUserId)
 
 	return lastInsertUserId, err

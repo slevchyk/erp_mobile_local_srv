@@ -425,11 +425,12 @@ func UpdateUserGrants(db *sql.DB, ug models.UserGrants) (sql.Result, error) {
 				user_grants
 			SET				
 				is_visible = $1,				
-				is_available = $2			
+				is_available = $2
+				is_receiver = $3
 			WHERE
-				user_id=$3
-				AND odject_type = $4
-				AND odject_acc_id = $5
+				user_id=$4
+				AND odject_type = $5
+				AND odject_acc_id = $6
 			`)
 	if err != nil {
 		return nil, err
@@ -437,6 +438,7 @@ func UpdateUserGrants(db *sql.DB, ug models.UserGrants) (sql.Result, error) {
 	res, err := stmt.Exec(
 		ug.IsVisible,
 		ug.IsAvailable,
+		ug.IsReceiver,
 		ug.UserID,
 		ug.ObjectType,
 		ug.ObjectAccID)

@@ -178,5 +178,6 @@ func ScanUserGrants(rows *sql.Rows, ug *models.UserGrants) error {
 		&ug.ObjectAccID,
 		&ug.IsVisible,
 		&ug.IsAvailable,
+		&ug.IsReceiver,
 	)
 }

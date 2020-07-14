@@ -179,4 +179,5 @@ type UserGrants struct {
 	ObjectAccID string             `json:"odject_acc_id"`
 	IsVisible   ConvertibleBoolean `json:"is_visible"`
 	IsAvailable ConvertibleBoolean `json:"is_available"`
+	IsReceiver  ConvertibleBoolean `json:"is_receiver"`
 }

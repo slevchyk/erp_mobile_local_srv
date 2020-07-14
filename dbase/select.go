@@ -333,7 +333,7 @@ func SelectPayDeskByID(db *sql.DB, id int) (*sql.Rows, error) {
 			pd.id,
 			pd.pay_desk_type,
 			pd.user_id,
-			pd.	currency_acc_id,
+			pd.currency_acc_id,
 			pd.cost_item_acc_id,
 			pd.income_item_acc_id,	
 			pd.from_pay_office_acc_id,
@@ -344,7 +344,7 @@ func SelectPayDeskByID(db *sql.DB, id int) (*sql.Rows, error) {
 			pd.document_date,
 			pd.file_paths,
 			pd.files_quantity,
-			pd.checked,
+			pd.is_checked,
 			pd.created_at,
 			pd.updated_at,
 			pd.is_deleted,			    
@@ -362,7 +362,7 @@ func SelectPayDeskModifiedByMob(db *sql.DB) (*sql.Rows, error) {
 			pd.id,
 			pd.pay_desk_type,
 			pd.user_id,
-			pd.	currency_acc_id,
+			pd.currency_acc_id,
 			pd.cost_item_acc_id,
 			pd.income_item_acc_id,	
 			pd.from_pay_office_acc_id,
@@ -391,7 +391,7 @@ func SelectPayDeskModifiedByAcc(db *sql.DB, userID string) (*sql.Rows, error) {
 			pd.id,
 			pd.pay_desk_type,
 		    pd.user_id,
-			pd.	currency_acc_id,
+			pd.currency_acc_id,
 			pd.cost_item_acc_id,
 			pd.income_item_acc_id,	
 			pd.from_pay_office_acc_id,
@@ -402,7 +402,7 @@ func SelectPayDeskModifiedByAcc(db *sql.DB, userID string) (*sql.Rows, error) {
 			pd.document_date,
 			pd.file_paths,
 			pd.files_quantity,
-			pd.checked,
+			pd.is_checked,
 			pd.created_at,
 			pd.updated_at,
 			pd.is_deleted,			    
@@ -559,7 +559,8 @@ func SelectUserGrants(db *sql.DB) (*sql.Rows, error) {
 			ug.user_id,
 			ug.odject_type,
 			ug.is_visible,
-			ug.is_available
+			ug.is_available,
+			ug.is_receiver
 		FROM 
 			user_grants ug`)
 }
@@ -571,7 +572,8 @@ func SelectUserGrantsByUserID(db *sql.DB, userID string) (*sql.Rows, error) {
 			ug.odject_type,
 			ug.odject_acc_id,
 			ug.is_visible,
-			ug.is_available
+			ug.is_available,
+			ug.is_receiver
 		FROM 
 			user_grants ug
 		WHERE
@@ -585,7 +587,8 @@ func SelectUserGrantsByUserIDObject(db *sql.DB, userID string, objectType int, o
 			ug.odject_type,
 			ug.odject_acc_id,
 			ug.is_visible,
-			ug.is_available
+			ug.is_available,
+			ug.is_receiver
 		FROM 
 			user_grants ug
 		WHERE
