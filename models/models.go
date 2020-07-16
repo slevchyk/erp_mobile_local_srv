@@ -181,3 +181,12 @@ type UserGrants struct {
 	IsAvailable ConvertibleBoolean `json:"is_available"`
 	IsReceiver  ConvertibleBoolean `json:"is_receiver"`
 }
+
+type WebserverLog struct {
+	Time      string `json:""`
+	ID        string `json:""`
+	MobID     string `json:""`
+	AccID     string `json:""`
+	IsEroor   bool   `json:""`
+	IsWarning bool   `json:""`
+}

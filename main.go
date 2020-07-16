@@ -428,6 +428,10 @@ func validate(username, password string) bool {
 	return false
 }
 
+func printWebServerLog(wsl models.WebServerLog) {
+	log.Printf("%v\tID=%v\tMobID=%v\tAccID=%v\tIsError=%v\tIsWarning=%v\tMessage=%v", wsl.Time, wsl.ID, wsl.MobID, wsl.AccID, wsl.IsError, wsl.IsWarning, wsl.Message)
+}
+
 func channelsHandler(w http.ResponseWriter, r *http.Request) {
 
 	if r.Method == http.MethodPost {
@@ -655,7 +659,9 @@ func timingHandler(w http.ResponseWriter, r *http.Request) {
 func timingPost(w http.ResponseWriter, r *http.Request) {
 
 	var ts []models.Timing
+	var ets []models.Timing
 	var err error
+	var wsls []models.WebServerLog
 
 	// параметр який вказує наам з якого об'єкта прийшли дані
 	// це може бути або мобільний пристрій або облікова система
@@ -689,6 +695,7 @@ func timingPost(w http.ResponseWriter, r *http.Request) {
 		// щоб була можливість модифікувати його під час синхроназації
 		// t := &v
 		t := &ts[k]
+
 		if t.ID != 0 {
 			rows, err := dbase.SelectTimingById(db, t.ID)
 			if err != nil {
@@ -698,8 +705,18 @@ func timingPost(w http.ResponseWriter, r *http.Request) {
 
 			if !rows.Next() {
 				rows.Close()
-				http.Error(w, fmt.Sprintf("timing with id=%v not found\n", t.ID), http.StatusBadRequest)
-				return
+
+				wsl := models.WebServerLog{
+					Time:      time.Now().Format("2006-01-02"),
+					ID:        string(t.ID),
+					MobID:     string(t.MobID),
+					AccID:     t.AccID,
+					IsError:   false,
+					IsWarning: true,
+					Message:   fmt.Sprintf("timing with ID not found\n")}
+				printWebServerLog(wsl)
+				wsls = append(wsls, wsl)
+				continue
 			}
 
 			var et models.Timing
@@ -710,22 +727,44 @@ func timingPost(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 
-			t.MobID = et.MobID
-			t.AccID = et.AccID
+			if et.MobID != 0 {
+				t.MobID = et.MobID
+			}
+
+			if et.AccID != "" {
+				t.AccID = et.AccID
+			}
+
 			if t.UpdatedAt.Time.After(et.UpdatedAt.Time) {
 				_, err = dbase.UpdateTiming(db, *t)
 				if err != nil {
 					http.Error(w, err.Error(), http.StatusInternalServerError)
 					return
 				}
+
+				wsl := models.WebServerLog{
+					Time:      time.Now().Format("2006-01-02"),
+					ID:        string(t.ID),
+					MobID:     string(t.MobID),
+					AccID:     t.AccID,
+					IsError:   false,
+					IsWarning: false,
+					Message:   fmt.Sprintf("updated by %v\n", fvFrom)}
+				printWebServerLog(wsl)
+				wsls = append(wsls, wsl)
 			} else {
-				t.Status = et.Status
-				t.IsTurnstile = et.IsTurnstile
-				t.StartedAt = et.StartedAt
-				t.EndedAt = et.EndedAt
-				t.CreatedAt = et.CreatedAt
-				t.UpdatedAt = et.UpdatedAt
-				t.DeletedAt = et.DeletedAt
+				ets = append(ets, et)
+
+				wsl := models.WebServerLog{
+					Time:      time.Now().Format("2006-01-02"),
+					ID:        string(t.ID),
+					MobID:     string(t.MobID),
+					AccID:     t.AccID,
+					IsError:   false,
+					IsWarning: false,
+					Message:   fmt.Sprintf("doesn't updated by %v: updated_at central=%v mobile=%v\n", fvFrom, et.UpdatedAt.Time.Format("2006-01-02"), t.UpdatedAt.Time.Format("2006-01-02"))}
+				printWebServerLog(wsl)
+				wsls = append(wsls, wsl)
 			}
 		} else if fvFrom == Mobile {
 			rows, err := dbase.SelectTimingByMobIdUserIdDate(db, t.MobID, t.UserID, t.Date.Time)
@@ -751,14 +790,30 @@ func timingPost(w http.ResponseWriter, r *http.Request) {
 						http.Error(w, err.Error(), http.StatusInternalServerError)
 						return
 					}
+
+					wsl := models.WebServerLog{
+						Time:      time.Now().Format("2006-01-02"),
+						ID:        string(t.ID),
+						MobID:     string(t.MobID),
+						AccID:     t.AccID,
+						IsError:   false,
+						IsWarning: false,
+						Message:   fmt.Sprintf("updated by mobile\n")}
+					printWebServerLog(wsl)
+					wsls = append(wsls, wsl)
 				} else {
-					t.Status = et.Status
-					t.IsTurnstile = et.IsTurnstile
-					t.StartedAt = et.StartedAt
-					t.EndedAt = et.EndedAt
-					t.CreatedAt = et.CreatedAt
-					t.UpdatedAt = et.UpdatedAt
-					t.DeletedAt = et.DeletedAt
+					ets = append(ets, et)
+
+					wsl := models.WebServerLog{
+						Time:      time.Now().Format("2006-01-02"),
+						ID:        string(t.ID),
+						MobID:     string(t.MobID),
+						AccID:     t.AccID,
+						IsError:   false,
+						IsWarning: true,
+						Message:   fmt.Sprintf("doesn't updated by mobile: updated_at central=%v mobile=%v\n", et.UpdatedAt.Time.Format("2006-01-02"), t.UpdatedAt.Time.Format("2006-01-02"))}
+					printWebServerLog(wsl)
+					wsls = append(wsls, wsl)
 				}
 			} else {
 				rows.Close()
@@ -768,6 +823,17 @@ func timingPost(w http.ResponseWriter, r *http.Request) {
 					http.Error(w, err.Error(), http.StatusInternalServerError)
 					return
 				}
+
+				wsl := models.WebServerLog{
+					Time:      time.Now().Format("2006-01-02"),
+					ID:        string(t.ID),
+					MobID:     string(t.MobID),
+					AccID:     t.AccID,
+					IsError:   false,
+					IsWarning: false,
+					Message:   fmt.Sprintf("added by mobile\n")}
+				printWebServerLog(wsl)
+				wsls = append(wsls, wsl)
 			}
 		} else if fvFrom == Accounting {
 			rows, err := dbase.SelectTimingByAccIdUerIdDate(db, t.AccID, t.UserID, t.Date.Time)
@@ -793,14 +859,30 @@ func timingPost(w http.ResponseWriter, r *http.Request) {
 						http.Error(w, err.Error(), http.StatusInternalServerError)
 						return
 					}
+
+					wsl := models.WebServerLog{
+						Time:      time.Now().Format("2006-01-02"),
+						ID:        string(t.ID),
+						MobID:     string(t.MobID),
+						AccID:     t.AccID,
+						IsError:   false,
+						IsWarning: false,
+						Message:   fmt.Sprintf("updated by accounting\n")}
+					printWebServerLog(wsl)
+					wsls = append(wsls, wsl)
 				} else {
-					t.Status = et.Status
-					t.IsTurnstile = et.IsTurnstile
-					t.StartedAt = et.StartedAt
-					t.EndedAt = et.EndedAt
-					t.CreatedAt = et.CreatedAt
-					t.UpdatedAt = et.UpdatedAt
-					t.DeletedAt = et.DeletedAt
+					ets = append(ets, et)
+
+					wsl := models.WebServerLog{
+						Time:      time.Now().Format("2006-01-02"),
+						ID:        string(t.ID),
+						MobID:     string(t.MobID),
+						AccID:     t.AccID,
+						IsError:   false,
+						IsWarning: false,
+						Message:   fmt.Sprintf("doesn't updated by accounting: updated_at central:%v mobile:%v\n", et.UpdatedAt.Time.Format("2006-01-02"), t.UpdatedAt.Time.Format("2006-01-02"))}
+					printWebServerLog(wsl)
+					wsls = append(wsls, wsl)
 				}
 			} else {
 				rows.Close()
@@ -809,11 +891,24 @@ func timingPost(w http.ResponseWriter, r *http.Request) {
 					http.Error(w, err.Error(), http.StatusInternalServerError)
 					return
 				}
+
+				wsl := models.WebServerLog{
+					Time:      time.Now().Format("2006-01-02"),
+					ID:        string(t.ID),
+					MobID:     string(t.MobID),
+					AccID:     t.AccID,
+					IsError:   false,
+					IsWarning: false,
+					Message:   fmt.Sprintf("added by accounting\n")}
+				printWebServerLog(wsl)
+				wsls = append(wsls, wsl)
 			}
 		}
 	}
 
-	response := map[string][]models.Timing{"timing": ts}
+	response := map[string]interface{}{
+		"timing": ets,
+		"log":    wsls}
 	bs, err = json.Marshal(response)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
