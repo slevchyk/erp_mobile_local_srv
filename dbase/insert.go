@@ -360,7 +360,7 @@ func InsertUserGrants(db *sql.DB, ug models.UserGrants) (string, error) {
 				is_available,
 				is_receiver
 			)
-		VALUES ($1, $2, $3, $4, $5) RETURNING user_id`,
+		VALUES ($1, $2, $3, $4, $5, $6) RETURNING user_id`,
 		ug.UserID,
 		ug.ObjectType,
 		ug.ObjectAccID,
