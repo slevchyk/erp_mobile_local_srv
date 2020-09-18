@@ -373,7 +373,7 @@ func UpdatePayOfficeBalance(db *sql.DB, pob models.PayOfficeBalance) (sql.Result
 				balance = $1,
 				updated_at = $2				
 			WHERE
-				acc_id=$7
+				acc_id=$3
 			`)
 	if err != nil {
 		return nil, err
