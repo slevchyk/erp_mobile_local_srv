@@ -425,7 +425,7 @@ func UpdateUserGrants(db *sql.DB, ug models.UserGrants) (sql.Result, error) {
 				user_grants
 			SET				
 				is_visible = $1,				
-				is_available = $2
+				is_available = $2,
 				is_receiver = $3
 			WHERE
 				user_id=$4
