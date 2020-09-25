@@ -444,6 +444,36 @@ func SelectPayDeskByUserID(db *sql.DB, userID string) (*sql.Rows, error) {
 			pd.user_id = $1`, userID)
 }
 
+func SelectPayDeskByPayOfficeID(db *sql.DB, payOfficeID string) (*sql.Rows, error) {
+	return db.Query(`
+		SELECT
+			pd.id,
+			pd.pay_desk_type,
+		    pd.user_id,
+			pd.currency_acc_id,
+			pd.cost_item_acc_id,
+			pd.income_item_acc_id,	
+			pd.from_pay_office_acc_id,
+			pd.to_pay_office_acc_id,
+			pd.amount,
+			pd.payment,
+			pd.document_number,
+			pd.document_date,
+			pd.file_paths,
+			pd.files_quantity,
+			pd.is_checked,
+			pd.created_at,
+			pd.updated_at,
+			pd.is_deleted,			    
+			pd.is_modified_by_mob,
+			pd.is_modified_by_acc		       
+		FROM 
+			pay_desk pd
+		WHERE
+			pd.from_pay_office_acc_id = $1
+				OR pd.to_pay_office_acc_id = $1`, payOfficeID)
+}
+
 func SelectCostItems(db *sql.DB) (*sql.Rows, error) {
 	return db.Query(`
 		SELECT

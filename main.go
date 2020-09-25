@@ -1585,8 +1585,9 @@ func payDeskGet(w http.ResponseWriter, r *http.Request) {
 	fvID := r.FormValue("id")
 	fvFor := r.FormValue("for")
 	fvUserID := r.FormValue("user_id")
+	fvPayOfficeID := r.FormValue("pay_office_id")
 
-	if fvID == "" && fvFor == "" && fvUserID == "" {
+	if fvID == "" && fvFor == "" && fvUserID == "" && fvPayOfficeID == "" {
 		http.Error(w, "incorrect params", http.StatusBadRequest)
 		return
 	}
@@ -1686,6 +1687,41 @@ func payDeskGet(w http.ResponseWriter, r *http.Request) {
 		var rows *sql.Rows
 
 		rows, err = dbase.SelectPayDeskByUserID(db, fvUserID)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		for rows.Next() {
+			err = dbase.ScanPayDesk(rows, &pd)
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
+			hds = append(hds, pd)
+		}
+		rows.Close()
+
+		bs, err := json.Marshal(hds)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		_, err = w.Write(bs)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		w.WriteHeader(http.StatusOK)
+		return
+
+	} else if fvPayOfficeID != "" {
+
+		var hds []models.PayDesk
+		var rows *sql.Rows
+
+		rows, err = dbase.SelectPayDeskByPayOfficeID(db, fvPayOfficeID)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
