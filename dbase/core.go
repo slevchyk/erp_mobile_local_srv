@@ -139,6 +139,7 @@ func InitDB(db *sql.DB) {
 			file_paths TEXT DEFAULT '', 
 			files_quantity INTEGER DEFAULT 0,
 			is_checked BOOLEAN,
+			is_read_only BOOLEAN DEFAULT false,
 			created_at TIMESTAMP,
 			updated_at TIMESTAMP,			
 			is_deleted BOOLEAN DEFAULT false,
@@ -221,6 +222,29 @@ func InitDB(db *sql.DB) {
 			is_visible BOOLEAN DEFAULT false,
 			is_available BOOLEAN DEFAULT false,
 			is_receiver BOOLEAN DEFAULT false);
+			`)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	_, err = db.Exec(`
+		CREATE TABLE IF NOT EXISTS pay_desk_images (	
+			pid INTEGER,
+			image_name TEXT,
+			file TEXT,
+			sha256 TEXT,
+			is_deleted BOOLEAN DEFAULT false);
+			`)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	_, err = db.Exec(`
+		CREATE TABLE IF NOT EXISTS logs_info_files (	
+			user_id TEXT,
+			file_name TEXT,
+			file TEXT,
+			date TIMESTAMP);
 			`)
 	if err != nil {
 		log.Fatal(err)

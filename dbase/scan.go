@@ -109,6 +109,7 @@ func ScanPayDesk(rows *sql.Rows, pd *models.PayDesk) error {
 		&pd.FilePaths,
 		&pd.FilesQuantity,
 		&pd.IsChecked,
+		&pd.IsReadOnly,
 		&pd.CreatedAt,
 		&pd.UpdatedAt,
 		&pd.IsDeleted,
@@ -179,5 +180,22 @@ func ScanUserGrants(rows *sql.Rows, ug *models.UserGrants) error {
 		&ug.IsVisible,
 		&ug.IsAvailable,
 		&ug.IsReceiver,
+	)
+}
+
+func ScanPayDeskImages(rows *sql.Rows, ug *models.PayDeskImage) error {
+	return rows.Scan(
+		&ug.PID,
+		&ug.ImageName,
+		&ug.File,
+		&ug.Sha256,
+		&ug.IsDeleted,
+	)
+}
+
+func ScanPayDeskSha256(rows *sql.Rows, ug *models.PayDeskImageSha256) error {
+	return rows.Scan(
+		&ug.ImageName,
+		&ug.Sha256,
 	)
 }

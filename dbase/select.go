@@ -345,6 +345,7 @@ func SelectPayDeskByID(db *sql.DB, id int) (*sql.Rows, error) {
 			pd.file_paths,
 			pd.files_quantity,
 			pd.is_checked,
+			pd.is_read_only,
 			pd.created_at,
 			pd.updated_at,
 			pd.is_deleted,			    
@@ -374,6 +375,7 @@ func SelectPayDeskModifiedByMob(db *sql.DB) (*sql.Rows, error) {
 			pd.file_paths,
 			pd.files_quantity,
 			pd.is_checked,
+			pd.is_read_only,
 			pd.created_at,
 			pd.updated_at,
 			pd.is_deleted,			    
@@ -403,6 +405,7 @@ func SelectPayDeskModifiedByAcc(db *sql.DB, userID string) (*sql.Rows, error) {
 			pd.file_paths,
 			pd.files_quantity,
 			pd.is_checked,
+			pd.is_read_only,
 			pd.created_at,
 			pd.updated_at,
 			pd.is_deleted,			    
@@ -433,6 +436,7 @@ func SelectPayDeskByUserID(db *sql.DB, userID string) (*sql.Rows, error) {
 			pd.file_paths,
 			pd.files_quantity,
 			pd.is_checked,
+			pd.is_read_only,
 			pd.created_at,
 			pd.updated_at,
 			pd.is_deleted,			    
@@ -462,6 +466,7 @@ func SelectPayDeskByPayOfficeID(db *sql.DB, payOfficeID string) (*sql.Rows, erro
 			pd.file_paths,
 			pd.files_quantity,
 			pd.is_checked,
+			pd.is_read_only,
 			pd.created_at,
 			pd.updated_at,
 			pd.is_deleted,			    
@@ -654,4 +659,46 @@ func SelectUserGrantsByUserIDObject(db *sql.DB, userID string, objectType int, o
 			ug.user_id = $1
 			AND ug.odject_type = $2
 			AND ug.odject_acc_id = $3`, userID, objectType, objectAccID)
+}
+
+func SelectPayDeskImagesByPaymentID(db *sql.DB, pid int) (*sql.Rows, error){
+	return db.Query(`
+		SELECT 
+			pdi.pid,
+			pdi.image_name,
+			pdi.file,
+			pdi.sha256,
+			pdi.is_deleted
+		FROM
+			 pay_desk_images pdi 
+		WHERE 
+			pdi.pid = $1
+			AND pdi.is_deleted = FALSE`, pid)
+}
+
+func SelectPayDeskImageSha256(db *sql.DB, pid int) (*sql.Rows, error) {
+	return db.Query(`
+		SELECT 
+			pdi.image_name,
+			pdi.sha256
+		FROM
+			 pay_desk_images pdi 
+		WHERE 
+			pdi.pid = $1
+			AND pdi.is_deleted = FALSE`, pid)
+}
+
+func SelectPayDeskImageByPaymentIDAndName(db *sql.DB, pid int, name string) (*sql.Rows, error){
+	return db.Query(`
+		SELECT 
+			pdi.pid,
+			pdi.image_name,
+			pdi.file,
+			pdi.sha256,
+			pdi.is_deleted
+		FROM
+			 pay_desk_images pdi 
+		WHERE 
+			pdi.pid = $1
+			AND pdi.image_name = $2`, pid, name)
 }

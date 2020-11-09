@@ -200,13 +200,14 @@ func InsertPayDesk(db *sql.DB, pd models.PayDesk) (int64, error) {
 				file_paths,
 				files_quantity,
 				is_checked,
+			    is_read_only,
 			    created_at,
 				updated_at,
 				is_deleted,			    
 			    is_modified_by_mob,
 			    is_modified_by_acc
 			)
-		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19) RETURNING id`,
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20) RETURNING id`,
 		pd.PayDeskType,
 		pd.UserID,
 		pd.CurrencyAccID,
@@ -221,6 +222,7 @@ func InsertPayDesk(db *sql.DB, pd models.PayDesk) (int64, error) {
 		pd.FilePaths,
 		pd.FilesQuantity,
 		pd.IsChecked,
+		pd.IsReadOnly,
 		pd.CreatedAt,
 		pd.UpdatedAt,
 		pd.IsDeleted,
@@ -370,4 +372,48 @@ func InsertUserGrants(db *sql.DB, ug models.UserGrants) (string, error) {
 		Scan(&lastInsertUserId)
 
 	return lastInsertUserId, err
+}
+
+func InsertPayDeskImage(db *sql.DB, pdi models.PayDeskImage) error {
+	var lastInsertId int64
+
+	err := db.QueryRow(`
+		INSERT INTO
+			pay_desk_images (
+				pid,
+				image_name,
+				file,
+				sha256,
+				is_deleted
+			)
+		VALUES ($1, $2, $3, $4, $5) RETURNING pid`,
+		pdi.PID,
+		pdi.ImageName,
+		pdi.File,
+		pdi.Sha256,
+		pdi.IsDeleted).
+		Scan(&lastInsertId)
+
+	return err
+}
+
+func InsertLogInfo(db *sql.DB, log models.LogInfo) error {
+	var lastInsertUserId string
+
+	err := db.QueryRow(`
+		INSERT INTO
+			logs_info_files (
+				user_id,
+				file_name,
+				file,
+				date
+			)
+		VALUES ($1, $2, $3, $4) RETURNING user_id`,
+		log.UserID,
+		log.FileName,
+		log.File,
+		log.Date).
+		Scan(&lastInsertUserId)
+
+	return err
 }

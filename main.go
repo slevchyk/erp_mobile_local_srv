@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"encoding/base64"
 	"encoding/json"
+	"flag"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -131,6 +132,8 @@ func webApp() {
 	http.HandleFunc("/api/payoffices/balance", basicAuth(payOfficesBalanceHandler))
 	http.HandleFunc("/api/currency", basicAuth(currencyHandler))
 	http.HandleFunc("/api/usergrants", basicAuth(userGrantsHandler))
+	http.HandleFunc("/api/upload", basicAuth(upload))
+	http.HandleFunc("/api/download", basicAuth(download))
 
 	http.HandleFunc("/test", testHandler)
 
@@ -916,7 +919,7 @@ func timingPost(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Write(bs)
-	w.WriteHeader(http.StatusOK)
+	//w.WriteHeader(http.StatusOK)
 }
 
 func timingGet(w http.ResponseWriter, r *http.Request) {
@@ -1023,7 +1026,7 @@ func timingGet(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Write(bs)
-	w.WriteHeader(http.StatusOK)
+	//w.WriteHeader(http.StatusOK)
 }
 
 func profileHandler(w http.ResponseWriter, r *http.Request) {
@@ -1092,7 +1095,7 @@ func profileGet(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.WriteHeader(http.StatusOK)
+	//w.WriteHeader(http.StatusOK)
 
 }
 
@@ -1249,7 +1252,7 @@ func helpDeskPost(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
-		w.WriteHeader(http.StatusOK)
+		//w.WriteHeader(http.StatusOK)
 
 		return
 	}
@@ -1350,7 +1353,7 @@ func helpDeskGet(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
-		w.WriteHeader(http.StatusOK)
+		//w.WriteHeader(http.StatusOK)
 		return
 	} else if fvFor != "" {
 
@@ -1401,7 +1404,7 @@ func helpDeskGet(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
-		w.WriteHeader(http.StatusOK)
+		//w.WriteHeader(http.StatusOK)
 		return
 	}
 
@@ -1517,7 +1520,6 @@ func payDeskPost(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
-		w.WriteHeader(http.StatusOK)
 
 		return
 	}
@@ -1630,7 +1632,7 @@ func payDeskGet(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
-		w.WriteHeader(http.StatusOK)
+		//w.WriteHeader(http.StatusOK)
 		return
 	} else if fvFor != "" {
 
@@ -1679,7 +1681,7 @@ func payDeskGet(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
-		w.WriteHeader(http.StatusOK)
+		//w.WriteHeader(http.StatusOK)
 		return
 	} else if fvUserID != "" {
 
@@ -1713,7 +1715,7 @@ func payDeskGet(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
-		w.WriteHeader(http.StatusOK)
+		//w.WriteHeader(http.StatusOK)
 		return
 
 	} else if fvPayOfficeID != "" {
@@ -1748,7 +1750,7 @@ func payDeskGet(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
-		w.WriteHeader(http.StatusOK)
+		//w.WriteHeader(http.StatusOK)
 		return
 
 	}
@@ -1914,7 +1916,7 @@ func costItemsGet(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	w.WriteHeader(http.StatusOK)
+	//w.WriteHeader(http.StatusOK)
 
 }
 
@@ -2020,7 +2022,7 @@ func incomeItemsGet(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	w.WriteHeader(http.StatusOK)
+	//w.WriteHeader(http.StatusOK)
 }
 
 func payOfficesHandler(w http.ResponseWriter, r *http.Request) {
@@ -2125,7 +2127,7 @@ func payOfficesGet(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	w.WriteHeader(http.StatusOK)
+	//w.WriteHeader(http.StatusOK)
 }
 
 func currencyHandler(w http.ResponseWriter, r *http.Request) {
@@ -2230,7 +2232,7 @@ func currencyGet(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	w.WriteHeader(http.StatusOK)
+	//w.WriteHeader(http.StatusOK)
 }
 
 func userGrantsHandler(w http.ResponseWriter, r *http.Request) {
@@ -2338,7 +2340,7 @@ func userGrantsGet(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	w.WriteHeader(http.StatusOK)
+	//w.WriteHeader(http.StatusOK)
 }
 
 func payOfficesBalanceHandler(w http.ResponseWriter, r *http.Request) {
@@ -2436,5 +2438,186 @@ func payOfficesBalanceGet(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	w.WriteHeader(http.StatusOK)
+	//w.WriteHeader(http.StatusOK)
+}
+
+func upload(w http.ResponseWriter, r *http.Request) {
+
+	fvType := r.FormValue("type")
+
+	switch fvType {
+	case "paydesk":
+		{
+
+			var image models.PayDeskImage
+
+			bs, err := ioutil.ReadAll(r.Body)
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
+
+			err = json.Unmarshal(bs, &image)
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
+
+			rows, err := dbase.SelectPayDeskImageByPaymentIDAndName(db, image.PID, image.ImageName)
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
+
+			if rows.Next() {
+				_, err = dbase.UpdatePayDeskImages(db, image)
+				if err != nil {
+					http.Error(w, err.Error(), http.StatusInternalServerError)
+					return
+				}
+				w.WriteHeader(http.StatusOK)
+				return
+			} else {
+				err = dbase.InsertPayDeskImage(db, image)
+				if err != nil {
+					http.Error(w, err.Error(), http.StatusInternalServerError)
+					return
+				}
+			}
+
+			w.WriteHeader(http.StatusOK)
+			return
+		}
+	case "log":
+
+		var logInfo models.LogInfo
+
+		bs, err := ioutil.ReadAll(r.Body)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		err = json.Unmarshal(bs, &logInfo)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		err = dbase.InsertLogInfo(db, logInfo)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		w.WriteHeader(http.StatusOK)
+	default:
+		http.Error(w, "incorrect \"type\" param", http.StatusBadRequest)
+	}
+
+}
+
+func download(w http.ResponseWriter, r *http.Request) {
+
+	var rows *sql.Rows
+
+	fvType := r.FormValue("type")
+
+	switch fvType {
+	case "paydesk":
+
+		var image models.PayDeskImage
+		var hds []models.PayDeskImage
+		fvPayDeskID := r.FormValue("pid")
+
+		if fvPayDeskID != "" {
+			// flag.Parse()
+			id, err := strconv.Atoi(fvPayDeskID)
+			if err != nil {
+				print(err.Error() + " error \n")
+				http.Error(w, "bad argument", http.StatusBadRequest)
+				return
+			}
+
+			rows, err = dbase.SelectPayDeskImagesByPaymentID(db, id)
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
+
+			for rows.Next() {
+				err = dbase.ScanPayDeskImages(rows, &image)
+				if err != nil {
+					http.Error(w, err.Error(), http.StatusInternalServerError)
+					return
+				}
+				hds = append(hds, image)
+			}
+			rows.Close()
+
+			bs, err := json.Marshal(hds)
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
+
+			_, err = w.Write(bs)
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
+			return
+		}
+
+		http.Error(w, "bad params", http.StatusBadRequest)
+		break
+	case "check":
+		var sha256 models.PayDeskImageSha256
+		var hds []models.PayDeskImageSha256
+		fvTypeCheck := r.FormValue("types")
+		switch fvTypeCheck {
+		case "paydesk":
+			fvPayDeskID := r.FormValue("pid")
+			if fvPayDeskID != "" {
+				flag.Parse()
+
+				id, err := strconv.Atoi(fvPayDeskID)
+				if err != nil {
+					http.Error(w, "bad argument", http.StatusBadRequest)
+					return
+				}
+
+				rows, err = dbase.SelectPayDeskImageSha256(db, id)
+				if err != nil {
+					return
+				}
+
+				for rows.Next() {
+					err = dbase.ScanPayDeskSha256(rows, &sha256)
+					if err != nil {
+						http.Error(w, err.Error(), http.StatusInternalServerError)
+						return
+					}
+					hds = append(hds, sha256)
+				}
+				rows.Close()
+
+				bs, err := json.Marshal(hds)
+				if err != nil {
+					http.Error(w, err.Error(), http.StatusInternalServerError)
+					return
+				}
+
+				_, err = w.Write(bs)
+				if err != nil {
+					http.Error(w, err.Error(), http.StatusInternalServerError)
+					return
+				}
+				return
+
+			}
+			http.Error(w, "bad params", http.StatusBadRequest)
+			break
+		}
+	}
 }

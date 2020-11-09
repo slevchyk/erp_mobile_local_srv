@@ -238,13 +238,14 @@ func UpdatePayDesk(db *sql.DB, pd models.PayDesk) (sql.Result, error) {
 				file_paths = $12,
 				files_quantity = $13,
 				is_checked = $14,
-				created_at = $15,
-				updated_at = $16,
-				is_deleted =$17,			    				
-				is_modified_by_mob = $18,
-				is_modified_by_acc = $19			
+				is_read_only = $15,
+				created_at = $16,
+				updated_at = $17,
+				is_deleted =$18,			    				
+				is_modified_by_mob = $19,
+				is_modified_by_acc = $20			
 			WHERE
-				id=$20
+				id=$21
 			`)
 	if err != nil {
 		return nil, err
@@ -264,6 +265,7 @@ func UpdatePayDesk(db *sql.DB, pd models.PayDesk) (sql.Result, error) {
 		pd.FilePaths,
 		pd.FilesQuantity,
 		pd.IsChecked,
+		pd.IsReadOnly,
 		pd.CreatedAt,
 		pd.UpdatedAt,
 		pd.IsDeleted,
@@ -442,5 +444,29 @@ func UpdateUserGrants(db *sql.DB, ug models.UserGrants) (sql.Result, error) {
 		ug.UserID,
 		ug.ObjectType,
 		ug.ObjectAccID)
+	return res, err
+}
+
+func UpdatePayDeskImages(db *sql.DB, pdi models.PayDeskImage) (sql.Result, error) {
+
+	var err error
+
+	stmt, err := db.Prepare(`
+			UPDATE
+				pay_desk_images
+			SET				
+				is_deleted = $1 
+			WHERE
+				pid =$2
+				AND 
+				image_name =$3
+			`)
+	if err != nil {
+		return nil, err
+	}
+	res, err := stmt.Exec(
+		pdi.IsDeleted,
+		pdi.PID,
+		pdi.ImageName)
 	return res, err
 }

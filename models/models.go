@@ -122,6 +122,7 @@ type PayDesk struct {
 	FilePaths          string             `json:"file_paths"`
 	FilesQuantity      int                `json:"files_quantity"`
 	IsChecked          ConvertibleBoolean `json:"is_checked"`
+	IsReadOnly         ConvertibleBoolean `json:"is_read_only"`
 	CreatedAt          NullTime           `json:"created_at"`
 	UpdatedAt          NullTime           `json:"updated_at"`
 	IsDeleted          ConvertibleBoolean `json:"is_deleted"`
@@ -190,4 +191,24 @@ type WebServerLog struct {
 	IsError   bool   `json:"is_error"`
 	IsWarning bool   `json:"is_warning"`
 	Message   string `json:"message"`
+}
+
+type PayDeskImage struct {
+	PID       int                `json:"pid"`
+	ImageName string             `json:"image_name"`
+	File      string             `json:"file"`
+	Sha256    string             `json:"sha256"`
+	IsDeleted ConvertibleBoolean `json:"is_deleted"`
+}
+
+type PayDeskImageSha256 struct {
+	ImageName string `json:"image_name"`
+	Sha256    string `json:"sha256"`
+}
+
+type LogInfo struct {
+	UserID    string    `json:"user_id"`
+	FileName  string    `json:"file_name"`
+	File      string    `json:"file"`
+	Date      NullTime  `json:"date"`
 }
