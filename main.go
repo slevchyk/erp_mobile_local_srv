@@ -5,7 +5,6 @@ import (
 	"database/sql"
 	"encoding/base64"
 	"encoding/json"
-	"flag"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -592,7 +591,7 @@ func channelGet(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Write(result)
-	w.WriteHeader(http.StatusOK)
+	//w.WriteHeader(http.StatusOK)
 }
 
 func tokenHandler(w http.ResponseWriter, r *http.Request) {
@@ -2453,18 +2452,21 @@ func upload(w http.ResponseWriter, r *http.Request) {
 
 			bs, err := ioutil.ReadAll(r.Body)
 			if err != nil {
+				print(err.Error())
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 				return
 			}
 
 			err = json.Unmarshal(bs, &image)
 			if err != nil {
+				print(err.Error())
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 				return
 			}
 
 			rows, err := dbase.SelectPayDeskImageByPaymentIDAndName(db, image.PID, image.ImageName)
 			if err != nil {
+				print(err.Error())
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 				return
 			}
@@ -2472,6 +2474,7 @@ func upload(w http.ResponseWriter, r *http.Request) {
 			if rows.Next() {
 				_, err = dbase.UpdatePayDeskImages(db, image)
 				if err != nil {
+					print(err.Error())
 					http.Error(w, err.Error(), http.StatusInternalServerError)
 					return
 				}
@@ -2480,10 +2483,12 @@ func upload(w http.ResponseWriter, r *http.Request) {
 			} else {
 				err = dbase.InsertPayDeskImage(db, image)
 				if err != nil {
+					print(err.Error())
 					http.Error(w, err.Error(), http.StatusInternalServerError)
 					return
 				}
 			}
+			rows.Close()
 
 			w.WriteHeader(http.StatusOK)
 			return
@@ -2541,6 +2546,7 @@ func download(w http.ResponseWriter, r *http.Request) {
 
 			rows, err = dbase.SelectPayDeskImagesByPaymentID(db, id)
 			if err != nil {
+				print(err.Error())
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 				return
 			}
@@ -2548,6 +2554,7 @@ func download(w http.ResponseWriter, r *http.Request) {
 			for rows.Next() {
 				err = dbase.ScanPayDeskImages(rows, &image)
 				if err != nil {
+					print(err.Error())
 					http.Error(w, err.Error(), http.StatusInternalServerError)
 					return
 				}
@@ -2557,12 +2564,14 @@ func download(w http.ResponseWriter, r *http.Request) {
 
 			bs, err := json.Marshal(hds)
 			if err != nil {
+				print(err.Error())
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 				return
 			}
 
 			_, err = w.Write(bs)
 			if err != nil {
+				print(err.Error())
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 				return
 			}
@@ -2579,22 +2588,25 @@ func download(w http.ResponseWriter, r *http.Request) {
 		case "paydesk":
 			fvPayDeskID := r.FormValue("pid")
 			if fvPayDeskID != "" {
-				flag.Parse()
+				//flag.Parse()
 
 				id, err := strconv.Atoi(fvPayDeskID)
 				if err != nil {
+					print(err.Error())
 					http.Error(w, "bad argument", http.StatusBadRequest)
 					return
 				}
 
 				rows, err = dbase.SelectPayDeskImageSha256(db, id)
 				if err != nil {
+					print(err.Error())
 					return
 				}
 
 				for rows.Next() {
 					err = dbase.ScanPayDeskSha256(rows, &sha256)
 					if err != nil {
+						print(err.Error())
 						http.Error(w, err.Error(), http.StatusInternalServerError)
 						return
 					}
@@ -2604,12 +2616,14 @@ func download(w http.ResponseWriter, r *http.Request) {
 
 				bs, err := json.Marshal(hds)
 				if err != nil {
+					print(err.Error())
 					http.Error(w, err.Error(), http.StatusInternalServerError)
 					return
 				}
 
 				_, err = w.Write(bs)
 				if err != nil {
+					print(err.Error())
 					http.Error(w, err.Error(), http.StatusInternalServerError)
 					return
 				}
