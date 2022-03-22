@@ -133,6 +133,7 @@ func webApp() {
 	http.HandleFunc("/api/usergrants", basicAuth(userGrantsHandler))
 	http.HandleFunc("/api/upload", basicAuth(upload))
 	http.HandleFunc("/api/download", basicAuth(download))
+	http.HandleFunc("/api/profileaccess", basicAuth(profileAccess))
 
 	http.HandleFunc("/test", testHandler)
 
@@ -163,7 +164,7 @@ func exePath() (string, error) {
 			if !fi.Mode().IsDir() {
 				return p, nil
 			}
-			err = fmt.Errorf("%s is directory", p)
+			// err = fmt.Errorf("%s is directory", p)
 		}
 	}
 	return "", err
@@ -2633,5 +2634,42 @@ func download(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "bad params", http.StatusBadRequest)
 			break
 		}
+	}
+}
+
+func profileAccess(w http.ResponseWriter, r *http.Request) {
+	fvUid := r.FormValue("uid")
+
+	if fvUid == "" {
+		http.Error(w, "user id can not be empty", http.StatusBadRequest)
+		return
+	}
+
+	rows, err := dbase.SelectProfileByUserID(db, fvUid)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	if rows.Next() {
+		var existProfile models.Profile
+		err := dbase.ScanProfile(rows, &existProfile)
+		rows.Close()
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		if existProfile.Blocked {
+			http.Error(w, "", http.StatusUnauthorized)
+			return
+		} else {
+			http.Error(w, "", http.StatusOK)
+			return
+		}
+	} else {
+
+		http.Error(w, "", http.StatusUnauthorized)
+		return
 	}
 }
